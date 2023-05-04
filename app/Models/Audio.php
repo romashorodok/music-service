@@ -42,6 +42,11 @@ class Audio extends Model
         return $this->belongsToMany(Genre::class, 'audio_genre');
     }
 
+    public function albums(): BelongsToMany
+    {
+        return $this->belongsToMany(Album::class, 'audio_album');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

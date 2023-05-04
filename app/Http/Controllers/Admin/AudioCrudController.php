@@ -70,6 +70,16 @@ class AudioCrudController extends CrudController
             'pivot' => true
         ]);
 
+        CRUD::addField([
+            'label' => 'Chose albums',
+            'type' => 'select_multiple',
+
+            'name' => 'albums',
+            'entity' => 'albums',
+            'attribute' => 'name',
+            'pivot' => true
+        ]);
+
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
