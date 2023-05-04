@@ -24,11 +24,11 @@ class AudioCrudController extends CrudController
      *
      * @return void
      */
-    public function setup()
+    public function setup(): void
     {
         CRUD::setModel(\App\Models\Audio::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/audio');
-        CRUD::setEntityNameStrings('audios', 'audios');
+        CRUD::setEntityNameStrings('audio', 'audios');
     }
 
     /**
@@ -37,10 +37,9 @@ class AudioCrudController extends CrudController
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
-    protected function setupListOperation()
+    protected function setupListOperation(): void
     {
         CRUD::column('title');
-
 
         /**
          * Columns can be defined using the fluent syntax or array syntax:
@@ -55,11 +54,21 @@ class AudioCrudController extends CrudController
      * @see https://backpackforlaravel.com/docs/crud-operation-create
      * @return void
      */
-    protected function setupCreateOperation()
+    protected function setupCreateOperation(): void
     {
         CRUD::setValidation(AudioRequest::class);
 
         CRUD::field('title');
+
+        CRUD::addField([
+            'label' => 'Chose genres',
+            'type' => 'select_multiple',
+
+            'name' => 'genres',
+            'entity' => 'genres',
+            'attribute' => 'name',
+            'pivot' => true
+        ]);
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -74,7 +83,7 @@ class AudioCrudController extends CrudController
      * @see https://backpackforlaravel.com/docs/crud-operation-update
      * @return void
      */
-    protected function setupUpdateOperation()
+    protected function setupUpdateOperation(): void
     {
         $this->setupCreateOperation();
     }

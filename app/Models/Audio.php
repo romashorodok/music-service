@@ -5,6 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Audio extends Model
 {
@@ -19,7 +20,7 @@ class Audio extends Model
 
     protected $table = 'audios';
     // protected $primaryKey = 'id';
-     public $timestamps = false;
+    public $timestamps = false;
     protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
@@ -36,6 +37,10 @@ class Audio extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+    public function genres(): BelongsToMany
+    {
+        return $this->belongsToMany(Genre::class, 'audio_genre');
+    }
 
     /*
     |--------------------------------------------------------------------------
