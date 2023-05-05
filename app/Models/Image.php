@@ -6,6 +6,7 @@ use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 
 class Image extends Model
@@ -38,6 +39,15 @@ class Image extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+    public function albums(): BelongsToMany
+    {
+        return $this->belongsToMany(Album::class, 'album_image');
+    }
+
+    public function audios(): BelongsToMany
+    {
+        return $this->belongsToMany(Audio::class, 'audio_image');
+    }
 
     /*
     |--------------------------------------------------------------------------

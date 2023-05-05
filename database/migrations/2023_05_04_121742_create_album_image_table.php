@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('album_image', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('album_id')->references('id')->on('albums')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('image_id')->references('id')->on('images')->cascadeOnUpdate()->cascadeOnDelete();
         });

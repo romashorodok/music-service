@@ -47,6 +47,11 @@ class Audio extends Model
         return $this->belongsToMany(Album::class, 'audio_album');
     }
 
+    public function images(): BelongsToMany
+    {
+        return $this->belongsToMany(Image::class, 'audio_image');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

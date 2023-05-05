@@ -12,7 +12,6 @@ return new class extends Migration {
     {
         Schema::create('audio_image', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('audio_id')->references('id')->on('audios')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('image_id')->references('id')->on('images')->cascadeOnUpdate()->cascadeOnDelete();
         });

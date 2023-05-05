@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ImageRequest;
+use App\Models\Album;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
@@ -63,6 +64,22 @@ class ImageCrudController extends CrudController
             'type' => 'upload',
             'name' => 'original_image',
             'upload' => true,
+        ]);
+
+        CRUD::addField([
+            'label' => 'Chose album',
+            'type' => 'select_multiple',
+            'name' => 'albums',
+            'entity' => 'albums',
+            'attribute' => 'name',
+        ]);
+
+        CRUD::addField([
+            'label' => 'Chose audio',
+            'type' => 'select_multiple',
+            'name' => 'audios',
+            'entity' => 'audios',
+            'attribute' => 'title',
         ]);
 
         /**
