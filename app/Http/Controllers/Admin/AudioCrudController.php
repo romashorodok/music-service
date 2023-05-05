@@ -71,7 +71,7 @@ class AudioCrudController extends CrudController
         ]);
 
         CRUD::addField([
-            'label' => 'Chose albums',
+            'label' => 'Chose album',
             'type' => 'select_multiple',
 
             'name' => 'albums',
