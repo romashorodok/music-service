@@ -41,6 +41,30 @@ class AudioCrudController extends CrudController
     {
         CRUD::column('title');
 
+        CRUD::addColumn([
+            'label' => 'Genres',
+            'type' => 'select_multiple',
+            'name' => 'genres',
+            'entity' => 'genres',
+            'attribute' => 'name',
+        ]);
+
+        CRUD::addColumn([
+            'label' => 'Albums',
+            'type' => 'select_multiple',
+            'name' => 'albums',
+            'entity' => 'albums',
+            'attribute' => 'name',
+        ]);
+
+        CRUD::addColumn([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.audio.show-image'
+        ]);
+
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -61,9 +85,15 @@ class AudioCrudController extends CrudController
         CRUD::field('title');
 
         CRUD::addField([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.audio.select-image'
+        ]);
+
+        CRUD::addField([
             'label' => 'Chose genres',
             'type' => 'select_multiple',
-
             'name' => 'genres',
             'entity' => 'genres',
             'attribute' => 'name',
@@ -78,14 +108,6 @@ class AudioCrudController extends CrudController
             'entity' => 'albums',
             'attribute' => 'name',
             'pivot' => true
-        ]);
-
-        CRUD::addField([
-            'label' => 'Chose image',
-            'type' => 'select_multiple',
-            'name' => 'images',
-            'entity' => 'images',
-            'attribute' => 'original_image',
         ]);
 
         /**

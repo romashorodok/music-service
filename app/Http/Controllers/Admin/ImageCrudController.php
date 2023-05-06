@@ -40,6 +40,12 @@ class ImageCrudController extends CrudController
      */
     protected function setupListOperation(): void
     {
+        CRUD::addColumn([
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.image.show-image'
+        ]);
+
         CRUD::column('original_image');
 
         /**
