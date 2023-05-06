@@ -88,7 +88,7 @@ class AudioCrudController extends CrudController
             'name' => 'images',
             'label' => 'Image',
             'type' => 'view',
-            'view' => 'components.admin.audio.select-image'
+            'view' => 'components.admin.shared.select-image'
         ]);
 
         CRUD::addField([

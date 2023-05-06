@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Components\Admin\Audio;
+namespace App\View\Components\Admin\Shared;
 
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -21,6 +21,6 @@ class SelectImage extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.admin.audio.select-image');
+        return view('components.admin.shared.select-image');
     }
 }

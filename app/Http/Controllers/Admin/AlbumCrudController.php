@@ -61,6 +61,13 @@ class AlbumCrudController extends CrudController
         CRUD::field('name');
 
         CRUD::addField([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.shared.select-image'
+        ]);
+
+        CRUD::addField([
             'label' => 'Chose audios',
             'type' => 'select_multiple',
 
@@ -68,14 +75,6 @@ class AlbumCrudController extends CrudController
             'entity' => 'audios',
             'attribute' => 'title',
             'pivot' => true
-        ]);
-
-        CRUD::addField([
-            'label' => 'Chose image',
-            'type' => 'select_multiple',
-            'name' => 'images',
-            'entity' => 'images',
-            'attribute' => 'original_image',
         ]);
 
         /**
