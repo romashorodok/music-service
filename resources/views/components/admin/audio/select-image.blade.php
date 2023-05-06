@@ -107,8 +107,6 @@
             if (selectedImage) {
                 const selectedImageUrl = $('.image-option input[type="radio"]:checked').siblings('img').attr('src');
                 $('.image-preview img').attr('src', selectedImageUrl);
-            } else {
-                $('.image-preview img').attr('src', '');
             }
         });
 
