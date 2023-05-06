@@ -41,11 +41,30 @@ class AlbumCrudController extends CrudController
     {
         CRUD::column('name');
 
+        CRUD::addColumn([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.album.show-image'
+        ]);
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
+    }
+
+    protected function autoSetupShowOperation()
+    {
+        CRUD::column('name');
+
+        CRUD::addColumn([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.album.show-image'
+        ]);
     }
 
     /**
