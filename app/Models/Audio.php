@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Audio extends Model
 {
@@ -63,6 +65,34 @@ class Audio extends Model
     | ACCESSORS
     |--------------------------------------------------------------------------
     */
+    public function uploadOriginalAudioFile($value): string|null
+    {
+        $disk = 'public';
+
+        if ($value == '') {
+            $audioFile = $this->attributes['original_audio_file'];
+
+            if ($audioFile != '') {
+                $exists = Storage::disk($disk)->exists($audioFile);
+
+                if ($exists) {
+                    Storage::disk($disk)->delete($audioFile);
+                }
+            }
+
+            return null;
+        } else {
+            return Storage::disk($disk)->putFile('', $value);
+        }
+    }
+
+    public function originalAudioFile(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $value == '' ? null : Storage::url($value),
+            set: fn($value) => $this->uploadOriginalAudioFile($value)
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------

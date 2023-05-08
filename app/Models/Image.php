@@ -66,16 +66,31 @@ class Image extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
-    public function setImage($value): string
+    public function setImage($value): string|null
     {
-        $store = 'public';
-        return Storage::disk($store)->putFile('', $value);
+        $disk = 'public';
+
+        if ($value == '') {
+            $imageFile = $this->attributes['original_image'];
+
+            if ($imageFile != '') {
+                $exists = Storage::disk($disk)->exists($imageFile);
+
+                if ($exists) {
+                    Storage::disk($disk)->delete($imageFile);
+                }
+            }
+
+            return null;
+        } else {
+            return Storage::disk($disk)->putFile('', $value);
+        }
     }
 
     public function originalImage(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => '/storage/' . $value,
+            get: fn($value) => $value == '' ? null : Storage::url($value),
             set: fn($value) => $this->setImage($value)
         );
     }
