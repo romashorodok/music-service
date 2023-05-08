@@ -73,6 +73,5 @@ class MinioServiceProvider extends ServiceProvider
     {
         Storage::extend('minio.image', fn($app, $config) => $this->initClient($config));
         Storage::extend('minio.audio', fn($app, $config) => $this->initClient($config));
-//        Storage::extend('test', fn($app, $config) => $this->initClient($config));
     }
 }
