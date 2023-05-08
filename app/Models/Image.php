@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\StorageUploadable;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,7 @@ class Image extends Model
 {
     use CrudTrait;
     use HasFactory;
+    use StorageUploadable;
 
     /*
     |--------------------------------------------------------------------------
@@ -27,6 +29,8 @@ class Image extends Model
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
+
+    private string $disk = 'minio.image';
 
     /*
     |--------------------------------------------------------------------------
@@ -66,32 +70,11 @@ class Image extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
-    public function setImage($value): string|null
-    {
-        $disk = 'public';
-
-        if ($value == '') {
-            $imageFile = $this->attributes['original_image'];
-
-            if ($imageFile != '') {
-                $exists = Storage::disk($disk)->exists($imageFile);
-
-                if ($exists) {
-                    Storage::disk($disk)->delete($imageFile);
-                }
-            }
-
-            return null;
-        } else {
-            return Storage::disk($disk)->putFile('', $value);
-        }
-    }
-
     public function originalImage(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value == '' ? null : Storage::url($value),
-            set: fn($value) => $this->setImage($value)
+            get: fn($value) => $value == '' ? null : Storage::disk($this->disk)->publicUrl($value),
+            set: fn($value) => $this->upload('original_image', $value)
         );
     }
 }
