@@ -31,20 +31,19 @@ trait StorageUploadable
     {
         /* @var Filesystem $client */
         $client = Storage::disk($this->disk);
-        $filename = $this->attributes[$attribute];
+        $filename = $this->attributes[$attribute] ?? null;
 
         $this->cleanUp($client, $filename);
 
-        if ($source || $source != '') {
-            $filename = $source->hashName();
+        if ($source == null) return null;
 
-            $stream = fopen($source, 'r+');
-            $client->writeStream($filename, $stream);
-            fclose($stream);
+        $filename = $source->hashName();
 
-            return $filename;
-        }
+        $stream = fopen($source, 'r+');
+        $client->writeStream($filename, $stream);
+        fclose($stream);
 
-        return null;
+        return $filename;
+
     }
 }
