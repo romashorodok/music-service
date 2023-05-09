@@ -34,14 +34,12 @@ func ConsumeTopic[F any](config *kafka.ConfigMap, topic string, out chan<- *Box[
 			continue
 		}
 
-		defer c.Close()
-
 		for {
 			log.Println("Consumer reader iteration")
 
 			container := NewConsumerContainer[F]()
 
-			msg, err := c.ReadMessage(-1)
+			msg, err := c.ReadMessage(100 * time.Millisecond)
 
 			if err != nil {
 				switch e := err.(type) {
@@ -58,16 +56,13 @@ func ConsumeTopic[F any](config *kafka.ConfigMap, topic string, out chan<- *Box[
 						// 2023/04/10 16:15:57 Error reading message: Application maximum poll interval (300000ms) exceeded by 162ms
 						// NOTE: if consume it loong time, if somehow handle it, if do that may escape one for loop
 						log.Printf("Error reading message: %v\n", err)
-
-						time.Sleep(time.Second * 10)
 					}
 				default:
 					log.Printf("Error reading message: %v\n", err)
 				}
 
-				c.Close()
-
-				break
+				time.Sleep(time.Second * 10)
+				continue
 			}
 
 			if err = json.Unmarshal(msg.Value, &container.Data); err != nil {

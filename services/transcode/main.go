@@ -28,9 +28,10 @@ type TranscodeAudioTopic struct {
 }
 
 var config = &kafka.ConfigMap{
-	"bootstrap.servers": KAFKA,
-	"group.id":          "upload-consumers",
-	"auto.offset.reset": "earliest",
+	"bootstrap.servers":  KAFKA,
+	"group.id":           "upload-consumers",
+	"auto.offset.reset":  "earliest",
+	"session.timeout.ms": 6000,
 }
 
 var signals = make(chan os.Signal, 1)
