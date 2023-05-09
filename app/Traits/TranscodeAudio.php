@@ -22,7 +22,7 @@ trait TranscodeAudio
     {
         $audioFile = $audio->getAttributes()['original_audio_file'] ?? null;
 
-//        if ($audioFile == null && $audioFile == '') return;
+        if ($audioFile == null && $audioFile == '') return;
 
         /* @var Filesystem $client */
         $client = Storage::disk('minio.segment');

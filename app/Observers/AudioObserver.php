@@ -20,8 +20,7 @@ class AudioObserver
     /**
      * Handle the Audio "updated" event.
      */
-    public
-    function updated(Audio $audio): void
+    public function updated(Audio $audio): void
     {
         // IF manifest file exists don't transcode and check for what file it transcoded for.
         $this->transcode($audio);
@@ -30,8 +29,7 @@ class AudioObserver
     /**
      * Handle the Audio "deleted" event.
      */
-    public
-    function deleted(Audio $audio): void
+    public function deleted(Audio $audio): void
     {
         //
     }
@@ -39,8 +37,7 @@ class AudioObserver
     /**
      * Handle the Audio "restored" event.
      */
-    public
-    function restored(Audio $audio): void
+    public function restored(Audio $audio): void
     {
         //
     }
@@ -48,8 +45,7 @@ class AudioObserver
     /**
      * Handle the Audio "force deleted" event.
      */
-    public
-    function forceDeleted(Audio $audio): void
+    public function forceDeleted(Audio $audio): void
     {
         //
     }
