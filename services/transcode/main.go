@@ -28,10 +28,11 @@ type TranscodeAudioTopic struct {
 }
 
 var config = &kafka.ConfigMap{
-	"bootstrap.servers":  KAFKA,
-	"group.id":           "upload-consumers",
-	"auto.offset.reset":  "earliest",
-	"session.timeout.ms": 6000,
+	"bootstrap.servers":    KAFKA,
+	"group.id":             "upload-consumers",
+	"auto.offset.reset":    "earliest",
+	"max.poll.interval.ms": 7000,
+	"session.timeout.ms":   6000,
 }
 
 var signals = make(chan os.Signal, 1)
@@ -91,13 +92,15 @@ func processTopicMessages(ctx context.Context, topicChan <-chan *consumer.Box[*T
 					return
 				}
 
-				transcodesvc.TranscodeAudio(&transcoder.TranscodeData{
+				if err := transcodesvc.TranscodeAudio(&transcoder.TranscodeData{
 					BucketId:         msg.Data.BucketId,
 					AudioFile:        msg.Data.AudioFile,
 					AudioFileBucket:  msg.Data.AudioFileBucket,
 					ProcessingBucket: msg.Data.ProcessingBucket,
 					SegmentBucket:    msg.Data.SegmentBucket,
-				})
+				}); err != nil {
+					log.Println(err)
+				}
 
 				log.Printf("End pocessing message to topic %s [%d] at offset %v\n",
 					*msg.Message.TopicPartition.Topic, msg.Message.TopicPartition.Partition, msg.Message.TopicPartition.Offset)

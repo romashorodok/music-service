@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/minio/minio-go/v7"
-	ffmpeg "github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg"
-	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/codecs"
-	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/fragments"
-	"github.com/romashorodok/music-service/services/transcode/pkgs/storage"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/minio/minio-go/v7"
+	ffmpeg "github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg"
+	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/codecs"
+	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/fragments"
+	"github.com/romashorodok/music-service/services/transcode/pkgs/storage"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ type TranscodeData struct {
 	ProcessingBucket string `json:"processing_bucket"`
 	SegmentBucket    string `json:"segment_bucket"`
 
-	manifestFile *string `json:"manifest_file"'`
+	manifestFile *string `json:"manifest_file"`
 }
 
 type TranscoderService struct {
