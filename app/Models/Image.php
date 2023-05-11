@@ -75,7 +75,7 @@ class Image extends Model
     public function originalImage(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => 'storage/' . $value,
+            get: fn($value) => '/storage/' . $value,
             set: fn($value) => $this->setImage($value)
         );
     }

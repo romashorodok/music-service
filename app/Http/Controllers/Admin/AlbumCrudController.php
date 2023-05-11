@@ -41,11 +41,30 @@ class AlbumCrudController extends CrudController
     {
         CRUD::column('name');
 
+        CRUD::addColumn([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.album.show-image'
+        ]);
+
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
          * - CRUD::addColumn(['name' => 'price', 'type' => 'number']);
          */
+    }
+
+    protected function autoSetupShowOperation()
+    {
+        CRUD::column('name');
+
+        CRUD::addColumn([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.album.show-image'
+        ]);
     }
 
     /**
@@ -61,6 +80,13 @@ class AlbumCrudController extends CrudController
         CRUD::field('name');
 
         CRUD::addField([
+            'name' => 'images',
+            'label' => 'Image',
+            'type' => 'view',
+            'view' => 'components.admin.shared.select-image'
+        ]);
+
+        CRUD::addField([
             'label' => 'Chose audios',
             'type' => 'select_multiple',
 
@@ -68,14 +94,6 @@ class AlbumCrudController extends CrudController
             'entity' => 'audios',
             'attribute' => 'title',
             'pivot' => true
-        ]);
-
-        CRUD::addField([
-            'label' => 'Chose image',
-            'type' => 'select_multiple',
-            'name' => 'images',
-            'entity' => 'images',
-            'attribute' => 'original_image',
         ]);
 
         /**
