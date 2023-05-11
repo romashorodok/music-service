@@ -81,9 +81,27 @@ func (s *MinioService) GetObjectURL(ctx context.Context, bucket, filename string
 	return client.PresignedGetObject(ctx, bucket, filename, urlExparation, nil)
 }
 
-func (s *MinioService) DeleteBucket(ctx context.Context, bucket string) error {
+func (s *MinioService) DeleteObjectsRecur(ctx context.Context, bucket, folderPath string) <-chan minio.RemoveObjectError {
 	client := s.Pool.Client()
 	defer s.Pool.Put(client)
 
-	return client.RemoveBucket(ctx, bucket)
+	objectsCh := make(chan minio.ObjectInfo)
+
+	go func() {
+		defer close(objectsCh)
+
+		opts := minio.ListObjectsOptions{Prefix: folderPath, Recursive: true}
+
+		for object := range client.ListObjects(ctx, bucket, opts) {
+			objectsCh <- object
+		}
+	}()
+
+	errCh := client.RemoveObjects(ctx, bucket, objectsCh, minio.RemoveObjectsOptions{})
+
+	for err := range errCh {
+		log.Println(err)
+	}
+
+	return errCh
 }

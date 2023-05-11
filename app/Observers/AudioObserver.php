@@ -3,12 +3,25 @@
 namespace App\Observers;
 
 use App\Models\Audio;
+use App\Models\SegmentBucket;
 use App\Traits\TranscodeAudio;
+use Illuminate\Filesystem\FilesystemManager;
+use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 
 class AudioObserver
 {
     use TranscodeAudio;
+
+    private Filesystem $disk;
+
+    public function __construct(FilesystemManager $fs)
+    {
+        /* @var Filesystem $disk */
+        $disk = $fs->disk('minio.segment');
+
+        $this->disk = $disk;
+    }
 
     /**
      * Handle the Audio "created" event.
@@ -25,15 +38,29 @@ class AudioObserver
      */
     public function updated(Audio $audio): void
     {
-        $segmentBucket = $audio->segmentBucket()->get('segments_of_file')->first();
-        $segmentsOfFile = $segmentBucket['segments_of_file'];
+        /* @var SegmentBucket $segmentBucket */
+        $segmentBucket = $audio->segmentBucket()->get(['segments_of_file', 'bucket', 'manifest_file'])->first();
+        $manifest = $segmentBucket['manifest_file'];
+        $bucket = $segmentBucket['bucket'];
 
-        if ($segmentsOfFile == null || $segmentsOfFile == '') return;
+        if ($manifest != null || $manifest != '') {
+            $exists = $this->disk->fileExists($bucket . "/" . $manifest);
 
-        $file = $audio->getAttributes()['original_audio_file'] ?? null;
+            if (!$exists) {
+                $this->transcode($audio);
+                return;
+            }
+        }
 
-        if ($file != $segmentsOfFile)
+        $file = $audio->file();
+
+        if ($file && $file != '') {
+            $sameSegments = $segmentBucket->segmentsOf($file);
+
+            if ($sameSegments) return;
+
             $this->transcode($audio);
+        }
     }
 
     /**

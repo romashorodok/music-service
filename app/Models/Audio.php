@@ -38,6 +38,10 @@ class Audio extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
+    public function file(): ?string
+    {
+        return $this->attributes['original_audio_file'] ?? null;
+    }
 
     /*
     |--------------------------------------------------------------------------

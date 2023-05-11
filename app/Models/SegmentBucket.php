@@ -31,6 +31,16 @@ class SegmentBucket extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
+    public function segmentsOf(string $file): bool
+    {
+        $fileOfSegments = $this->attributes['segments_of_file'] ?? null;
+
+        if ($fileOfSegments != null && $fileOfSegments != '') {
+            return $file == $fileOfSegments;
+        }
+
+        return false;
+    }
 
     /*
     |--------------------------------------------------------------------------

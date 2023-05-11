@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -131,19 +132,33 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 	resp, err := http.Post(s.TRANSOCDE_CALLBACK, "application/json", bytes.NewReader(data))
 
 	if err != nil {
-		log.Println("Something goes wrong on post", err)
+		log.Println("Cannot send post request")
+		errCh := s.miniosvc.DeleteObjectsRecur(*s.ctx, t.SegmentBucket, t.ProcessingBucket)
 
-		subBucket := fmt.Sprintf("%s/%s", t.SegmentBucket, t.ProcessingBucket)
+		if errCh != nil {
+			err = errors.New("cannot delete processing folder")
+		}
 
-		log.Println("delete ", subBucket)
-
-		err = s.miniosvc.DeleteBucket(*s.ctx, subBucket)
 		return err
 	}
 
-	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		log.Println("Catch after post request", resp.Status)
+		errCh := s.miniosvc.DeleteObjectsRecur(*s.ctx, t.SegmentBucket, t.ProcessingBucket)
 
-	log.Println("Processed", string(respBody))
+		if errCh != nil {
+			err = errors.New("cannot delete processing folder")
+		}
+
+		return err
+	}
+
+	contentType := resp.Header.Get("Content-Type")
+
+	if contentType == "application/json" {
+		respBody, _ := io.ReadAll(resp.Body)
+		log.Println("Processed", string(respBody))
+	}
 
 	return err
 }
