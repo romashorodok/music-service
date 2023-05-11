@@ -80,3 +80,10 @@ func (s *MinioService) GetObjectURL(ctx context.Context, bucket, filename string
 
 	return client.PresignedGetObject(ctx, bucket, filename, urlExparation, nil)
 }
+
+func (s *MinioService) DeleteBucket(ctx context.Context, bucket string) error {
+	client := s.Pool.Client()
+	defer s.Pool.Put(client)
+
+	return client.RemoveBucket(ctx, bucket)
+}

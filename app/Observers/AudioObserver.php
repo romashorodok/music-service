@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Audio;
 use App\Traits\TranscodeAudio;
+use League\Flysystem\FilesystemException;
 
 class AudioObserver
 {
@@ -11,6 +12,7 @@ class AudioObserver
 
     /**
      * Handle the Audio "created" event.
+     * @throws FilesystemException
      */
     public function created(Audio $audio): void
     {
@@ -19,11 +21,19 @@ class AudioObserver
 
     /**
      * Handle the Audio "updated" event.
+     * @throws FilesystemException
      */
     public function updated(Audio $audio): void
     {
-        // IF manifest file exists don't transcode and check for what file it transcoded for.
-        $this->transcode($audio);
+        $segmentBucket = $audio->segmentBucket()->get('segments_of_file')->first();
+        $segmentsOfFile = $segmentBucket['segments_of_file'];
+
+        if ($segmentsOfFile == null || $segmentsOfFile == '') return;
+
+        $file = $audio->getAttributes()['original_audio_file'] ?? null;
+
+        if ($file != $segmentsOfFile)
+            $this->transcode($audio);
     }
 
     /**

@@ -48,9 +48,7 @@ trait TranscodeAudio
             ],
         );
 
-        $producer = Kafka::publishOn(self::$TOPIC)
-            ->withMessage($message);
-
+        $producer = Kafka::publishOn(self::$TOPIC)->withMessage($message);
         $producer->send();
     }
 }

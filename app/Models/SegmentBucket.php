@@ -5,6 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SegmentBucket extends Model
 {
@@ -19,7 +20,7 @@ class SegmentBucket extends Model
 
     protected $table = 'segment_buckets';
     // protected $primaryKey = 'id';
-     public $timestamps = false;
+    public $timestamps = false;
     protected $guarded = ['id'];
     // protected $fillable = [];
     // protected $hidden = [];
@@ -36,6 +37,10 @@ class SegmentBucket extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+    public function audio(): BelongsTo
+    {
+        return $this->belongsTo(Audio::class, 'audio_id', 'id');
+    }
 
     /*
     |--------------------------------------------------------------------------

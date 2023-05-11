@@ -1,10 +1,13 @@
 package transcoder
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,13 +30,15 @@ type TranscodeData struct {
 	ProcessingBucket string `json:"processing_bucket"`
 	SegmentBucket    string `json:"segment_bucket"`
 
-	manifestFile *string `json:"manifest_file"`
+	ManifestFile *string `json:"manifest_file"`
 }
 
 type TranscoderService struct {
 	ctx      *context.Context
 	miniosvc *storage.MinioService
 	producer *kafka.Producer
+
+	TRANSOCDE_CALLBACK string
 }
 
 var creds = &storage.MinioCredentials{
@@ -115,7 +120,7 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 
 	s.DeliverFiles(dir, t.SegmentBucket, t.ProcessingBucket)
 
-	t.manifestFile = &manifest
+	t.ManifestFile = &manifest
 	data, err := json.Marshal(t)
 
 	if err != nil {
@@ -123,10 +128,22 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 		return err
 	}
 
-	s.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &TRANSCODED_AUDIO_TOPIC, Partition: kafka.PartitionAny},
-		Value:          data,
-	}, nil)
+	resp, err := http.Post(s.TRANSOCDE_CALLBACK, "application/json", bytes.NewReader(data))
+
+	if err != nil {
+		log.Println("Something goes wrong on post", err)
+
+		subBucket := fmt.Sprintf("%s/%s", t.SegmentBucket, t.ProcessingBucket)
+
+		log.Println("delete ", subBucket)
+
+		err = s.miniosvc.DeleteBucket(*s.ctx, subBucket)
+		return err
+	}
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	log.Println("Processed", string(respBody))
 
 	return err
 }

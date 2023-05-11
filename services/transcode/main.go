@@ -17,6 +17,7 @@ const (
 	KAFKA = "localhost:9092"
 
 	TRANSCODE_AUDIO_TOPIC = "transcode-audio-topic"
+	TRANSOCDE_CALLBACK    = "http://localhost:8002/api/transcode"
 )
 
 type TranscodeAudioTopic struct {
@@ -31,7 +32,7 @@ var config = &kafka.ConfigMap{
 	"bootstrap.servers":    KAFKA,
 	"group.id":             "upload-consumers",
 	"auto.offset.reset":    "earliest",
-	"max.poll.interval.ms": 7000,
+	"max.poll.interval.ms": 8000,
 	"session.timeout.ms":   6000,
 }
 
@@ -63,6 +64,7 @@ func processTopicMessages(ctx context.Context, topicChan <-chan *consumer.Box[*T
 	}()
 
 	transcodesvc := transcoder.NewTranscoderService(&ctx, p)
+	transcodesvc.TRANSOCDE_CALLBACK = TRANSOCDE_CALLBACK
 
 	workerPool := make(chan struct{}, numWorkers)
 	for i := 0; i < numWorkers; i++ {
