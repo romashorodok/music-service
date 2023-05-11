@@ -2,8 +2,14 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Album;
+use App\Models\Audio;
+use App\Models\Genre;
+use App\Models\Image;
+use App\Models\User;
+use Database\Factories\Providers\GenreProvider;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +18,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        foreach (GenreProvider::$genres as $genre) {
+            $genre = Genre::factory()->create([
+                'name' => $genre
+            ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+            Album::factory(rand(1, 10))->create()->each(function(Album $album) use ($genre) {
+                $image = Image::factory()->create();
+
+                $album->images()->attach($image);
+
+                Audio::factory(rand(1, 10))->hasAttached($image)->hasAttached($genre)->hasAttached($album)->create();
+            });
+        }
+
+        User::factory()->create([
+            'name' => 'test@test.test',
+            'email' => 'test@test.test',
+            'password' => Hash::make('test@test.test')
+        ]);
     }
 }
