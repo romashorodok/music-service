@@ -54,9 +54,9 @@ func pollMessages[F any](c *kafka.Consumer, out chan<- *Box[F]) {
 			}
 
 		case kafka.Error:
-			log.Println("Error catched")
 
 			switch t.Code() {
+
 			case kafka.ErrTimedOut:
 				log.Println("Timed out while waiting for message")
 

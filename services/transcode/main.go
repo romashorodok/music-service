@@ -17,7 +17,7 @@ const (
 	KAFKA = "localhost:9092"
 
 	TRANSCODE_AUDIO_TOPIC = "transcode-audio-topic"
-	TRANSOCDE_CALLBACK    = "http://localhost:8002/api/transcode"
+	TRANSOCDE_CALLBACK    = "http://localhost:8000/api/transcode"
 )
 
 type TranscodeAudioTopic struct {
@@ -120,7 +120,7 @@ func main() {
 
 	containerChan := make(chan *consumer.Box[*TranscodeAudioTopic])
 	go consumer.ConsumeTopic(config, TRANSCODE_AUDIO_TOPIC, containerChan)
-	go processTopicMessages(ctx, containerChan, 4)
+	go processTopicMessages(ctx, containerChan, 2)
 
 	select {
 	case <-signals:

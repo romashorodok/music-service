@@ -38,8 +38,8 @@ class TranscodeService
         if ($processingBucket == null)
             throw new \Exception("Don't have currently processing bucket");
 
-        if (!$this->disk->fileExists($bucket . "/" . $manifest))
-            throw new \Exception("Manifest doesnt exists");
+        if (!$this->disk->directoryExists($bucket))
+            throw new \Exception("Bucket doesnt exists");
 
         /** @var Audio $audio */
         $audio = $segmentBucket->audio()->first();

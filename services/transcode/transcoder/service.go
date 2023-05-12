@@ -146,6 +146,14 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 		log.Println("Catch after post request", resp.Status)
 		errCh := s.miniosvc.DeleteObjectsRecur(*s.ctx, t.SegmentBucket, t.ProcessingBucket)
 
+		contentType := resp.Header.Get("Content-Type")
+
+		if contentType == "application/json" {
+			respBody, _ := io.ReadAll(resp.Body)
+			log.Println("Processed", string(respBody))
+		}
+
+
 		if errCh != nil {
 			err = errors.New("cannot delete processing folder")
 		}

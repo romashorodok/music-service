@@ -43,7 +43,7 @@ class AudioObserver
         $manifest = $segmentBucket['manifest_file'];
         $bucket = $segmentBucket['bucket'];
 
-        if ($manifest != null || $manifest != '') {
+        if ($manifest != null && $manifest != '') {
             $exists = $this->disk->fileExists($bucket . "/" . $manifest);
 
             if (!$exists) {
