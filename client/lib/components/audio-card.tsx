@@ -6,16 +6,7 @@ import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import * as Toggle from '@radix-ui/react-toggle';
 import React, {useState} from "react";
 import {PlayIcon, StopIcon} from '@radix-ui/react-icons'
-
-type Audio = {
-    title: string;
-}
-
-type Props = {
-    // audio: Audio.AsObject;
-    audio: Audio;
-    manifest: string;
-}
+import {Audio} from "~/lib/types/Audio";
 
 type PlayButtonProps = {
     active?: boolean;
@@ -53,7 +44,11 @@ export const PlayButton = React.forwardRef<
     </Toggle.Root>
 ))
 
-export default function ({audio, manifest}: Props) {
+type Props = {
+    audio: Audio;
+}
+
+export default function ({audio}: Props) {
     const {player, setAudio, audio: playingAudio, playing} = usePlayer();
 
     const [hoverButton, setHoverButton] = useState(false);
@@ -63,27 +58,27 @@ export default function ({audio, manifest}: Props) {
              className="justify-self-center shadow-blackA7 w-[180px] h-[200px] overflow-hidden bg-primary rounded-lg">
             <div className="flex flex-col p-4 w-full h-full">
                 <AspectRatio.Root ratio={4 / 3} className="relative w-full h-full">
-                    <img className="h-full w-full object-cover" src="stub-cover.jpg"/>
+                    <img className="h-full w-full object-contain" src={audio.image} alt={audio.title}/>
 
                     {hoverButton
                         ? <PlayButton
-                            className="flex items-center justify-center bg-white absolute bottom-[6px] right-[6px] rounded-3xl bg-black w-[49px] h-[49px]"
+                            className="flex items-center justify-center bg-white absolute bottom-[6px] right-[6px] rounded-3xl w-[49px] h-[49px]"
                             stopIconClassName="fill-curren text-black tw-[24px] h-[24px]"
                             playIconClassName="fill-curren text-black tw-[28px] h-[28px]"
                             active={false}
-                            onPlayClick={() => setAudio({...audio, manifest})}
+                            onPlayClick={() => setAudio(audio)}
                             onPauseClick={() => null}/>
                         : null}
 
-                    {/*{playingAudio?.audioId === audio?.audioId*/}
-                    {/*    ? <PlayButton*/}
-                    {/*        className="flex items-center justify-center bg-white absolute bottom-[6px] right-[6px] rounded-3xl bg-black w-[49px] h-[49px]"*/}
-                    {/*        stopIconClassName="fill-curren text-black tw-[24px] h-[24px]"*/}
-                    {/*        playIconClassName="fill-curren text-black tw-[28px] h-[28px]"*/}
-                    {/*        active={playing}*/}
-                    {/*        onPlayClick={player?.play}*/}
-                    {/*        onPauseClick={player?.pause} />*/}
-                    {/*    : null}*/}
+                    {playingAudio?.id === audio?.id
+                        ? <PlayButton
+                            className="flex items-center justify-center bg-white absolute bottom-[6px] right-[6px] rounded-3xl w-[49px] h-[49px]"
+                            stopIconClassName="fill-curren text-black tw-[24px] h-[24px]"
+                            playIconClassName="fill-curren text-black tw-[28px] h-[28px]"
+                            active={playing}
+                            onPlayClick={() => player.play()}
+                            onPauseClick={() => player.pause()}/>
+                        : null}
 
                 </AspectRatio.Root>
                 <h4 className="flex-[2] text-lg font-bold h-[36px] overflow-hidden overflow-ellipsis">{audio.title}</h4>

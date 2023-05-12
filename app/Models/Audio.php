@@ -24,30 +24,18 @@ class Audio extends Model
     */
 
     protected $table = 'audios';
-    // protected $primaryKey = 'id';
     public $timestamps = false;
     protected $guarded = ['id'];
-    // protected $fillable = [];
-    // protected $hidden = [];
-    // protected $dates = [];
+    protected $hidden = ['original_audio_file'];
+    protected $appends = ['manifest', 'image'];
 
     private string $disk = 'minio.audio';
 
-    /*
-    |--------------------------------------------------------------------------
-    | FUNCTIONS
-    |--------------------------------------------------------------------------
-    */
     public function file(): ?string
     {
         return $this->attributes['original_audio_file'] ?? null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONS
-    |--------------------------------------------------------------------------
-    */
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'audio_genre');
@@ -68,17 +56,6 @@ class Audio extends Model
         return $this->hasOne(SegmentBucket::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPES
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSORS
-    |--------------------------------------------------------------------------
-    */
     public function originalAudioFile(): Attribute
     {
         return Attribute::make(
@@ -87,9 +64,31 @@ class Audio extends Model
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MUTATORS
-    |--------------------------------------------------------------------------
-    */
+    public function getManifest(): ?string
+    {
+        $segmentBucket = $this->segmentBucket()->first();
+
+        return $segmentBucket['manifest_file'];
+    }
+
+    public function manifest(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getManifest(),
+        );
+    }
+
+    public function getImage(): ?string
+    {
+        $image = $this->images()->first();
+
+        return $image['original_image'];
+    }
+
+    public function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getImage()
+        );
+    }
 }

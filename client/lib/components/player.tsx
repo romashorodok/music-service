@@ -1,25 +1,25 @@
 'use client'
 
-import React from "react"
+import React, {useState} from "react"
 import usePlayer from "../hooks/usePlayer"
-// import dashjs from "dashjs";
-// import {MINIO_HOST} from "~/env";
 import * as Slider from '@radix-ui/react-slider';
 import {PlayButton} from "./audio-card";
 import {SpeakerLoudIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon} from '@radix-ui/react-icons';
 import * as Select from '@radix-ui/react-select';
+// @ts-ignore
+import shaka from "shaka-player";
 
 const DEFAULT_VOLUME = 0.4;
 
 const BITRATES = {
-    "LOW": 0,
-    "NORMAL": 1,
-    "HIGHT": 2
+    "LOW": 64000,
+    "NORMAL": 128000,
+    "HIGH": 320000,
 } as const;
 
 type BITRATE = keyof typeof BITRATES
 
-const BITRATES_KEYS: Array<BITRATE> = Object.keys(BITRATES) as Array<BITRATE>;
+const BITRATE_KEYS: Array<BITRATE> = Object.keys(BITRATES) as Array<BITRATE>;
 
 function formatAudioDuration(duration: number) {
     const hours = Math.floor(duration / 3600);
@@ -43,18 +43,20 @@ function formatAudioDuration(duration: number) {
     return formattedDuration;
 }
 
+shaka.polyfill.installAll();
+
 export default function ({className}: { className?: string }) {
-    // const [player] = React.useState(dashjs.MediaPlayer().create());
-    const [initialized, setInitialized] = React.useState<boolean>(false);
 
     const [time, setTime] = React.useState<number>();
     const [duration, setDuration] = React.useState<number>();
     const [volume, setVolume] = React.useState<number>();
-    const [bitrate, setBitrate] = React.useState<BITRATE>("HIGHT");
+    const [bitrate, setBitrate] = React.useState<BITRATE>("HIGH");
 
     const playerRef = React.useRef<HTMLAudioElement>(null);
 
     const {setPlayer, audio, setPlaying, playing} = usePlayer();
+
+    const [player] = useState<shaka.Player>(new shaka.Player());
 
     const visible = React.useMemo(() =>
             audio ?
@@ -64,49 +66,64 @@ export default function ({className}: { className?: string }) {
         , [audio]);
 
     React.useEffect(() => {
-        // player.on('playbackPaused', stopPlayingState);
-        // player.on('playbackPlaying', startPlayingState);
-        // player.on('qualityChangeRequested', onBitrateChange);
-        //
-        playerRef?.current?.addEventListener('timeupdate', onUpdate);
-        playerRef?.current?.addEventListener('volumechange', onVolumeChange);
 
         if (audio?.manifest) {
-            // player?.initialize(playerRef.current, MINIO_HOST + audio.manifest, true, 0);
-            // player.updateSettings({
-            //     streaming: {
-            //         abr: {
-            //             autoSwitchBitrate: {
-            //                 audio: false
-            //             },
-            //         },
-            //     }
-            // })
-            // setInitialized(true);
-            // setPlayer(player);
+            player.attach(playerRef.current).catch(console.error);
+
+            player.configure({
+                abr: {
+                    enabled: true,
+                    defaultBandwidthEstimate: BITRATES[bitrate]
+                }
+            });
+
+            player.load(audio.manifest)
+                .then(_ => {
+                    console.log("Currently playing", audio.title);
+                    onLoad();
+                }).catch(console.error);
+
+            playerRef.current.addEventListener('play', startPlayingState);
+            playerRef.current.addEventListener('pause', stopPlayingState);
+            playerRef.current.addEventListener('timeupdate', onUpdate);
+            playerRef.current.addEventListener('volumechange', onVolumeChange);
         }
 
         return () => {
-            // player.off("playbackPaused", stopPlayingState);
-            // player.off("playbackPlaying", startPlayingState);
-            // player.off("qualityChangeRequested", onBitrateChange);
-
+            playerRef?.current?.removeEventListener('play', startPlayingState);
+            playerRef?.current?.removeEventListener('pause', stopPlayingState);
             playerRef?.current?.removeEventListener('timeupdate', onUpdate);
             playerRef?.current?.removeEventListener('volumechange', onVolumeChange);
         }
     }, [audio]);
 
     React.useEffect(() => {
-        // if (initialized) player.setQualityFor("audio", BITRATES[bitrate])
-        //
-        // if (player && initialized) {
-        //     player.setQualityFor("audio", BITRATES[bitrate], true);
-        // }
-
+        player.configure({
+            abr: {
+                enabled: true,
+                restrictions: {
+                    maxBandwidth: BITRATES[bitrate]
+                }
+            }
+        });
     }, [bitrate])
 
-    function onBitrateChange(event: any) {
-        console.log(event)
+    React.useEffect(() => {
+        if (playerRef.current)
+            playerRef.current.volume = volume;
+    }, [volume]);
+
+    function onLoad() {
+        playerRef.current.play().catch(console.error);
+
+        setPlayer(playerRef.current);
+
+        playerRef.current.volume = DEFAULT_VOLUME;
+        const time = playerRef.current.currentTime ?? 0;
+
+        setTime(time);
+        setDuration(playerRef.current.duration);
+        setVolume(playerRef.current.volume);
     }
 
     function onVolumeChange(event: any) {
@@ -118,14 +135,8 @@ export default function ({className}: { className?: string }) {
     }
 
     function startPlayingState() {
-        // setPlaying(true);
-        // setDuration(player.duration());
-        //
-        // if (!volume)
-        //     player.setVolume(DEFAULT_VOLUME)
-        //
-        // setVolume(player.getVolume());
-        // player.setQualityFor("audio", BITRATES[bitrate], true);
+        setPlaying(true);
+
     }
 
     function stopPlayingState() {
@@ -140,12 +151,12 @@ export default function ({className}: { className?: string }) {
                 <div>
                     <div className="flex justify-center">
                         <PlayButton
-                            className="flex items-center justify-center bg-white bottom-[6px] right-[6px] rounded-3xl bg-black w-[33px] h-[33px]"
+                            className="flex items-center justify-center bg-white bottom-[6px] right-[6px] rounded-3xl w-[33px] h-[33px]"
                             stopIconClassName="fill-curren text-black tw-[24px] h-[24px]"
                             playIconClassName="fill-curren text-black tw-[28px] h-[28px]"
                             active={playing}
-                            // onPlayClick={() => player.play()}
-                            // onPauseClick={() => player.pause()}
+                            onPlayClick={() => playerRef.current.play()}
+                            onPauseClick={() => playerRef.current.pause()}
                         />
 
                     </div>
@@ -155,7 +166,7 @@ export default function ({className}: { className?: string }) {
                             className={`relative flex items-center select-none touch-none w-[200px] h-5 ` + className}
                             value={[time]}
                             max={duration}
-                            onValueChange={([duration]) => playerRef.current.currentTime = duration}
+                            onValueChange={([time]) => playerRef.current.currentTime = time}
                             defaultValue={[0]}
                             step={1}
                             aria-label="Volume">
@@ -164,7 +175,6 @@ export default function ({className}: { className?: string }) {
                             </Slider.Track>
                             <Slider.Thumb
                                 className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA7 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA8"/>
-
                         </Slider.Root>
                         <p>{formatAudioDuration(duration)}</p>
                     </div>
@@ -176,7 +186,7 @@ export default function ({className}: { className?: string }) {
                         className={`relative flex items-center select-none touch-none w-[80px] h-5 ` + className}
                         value={[volume]}
                         max={1}
-                        // onValueChange={([volume]) => player.setVolume(volume)}
+                        onValueChange={([volume]) => setVolume(volume)}
                         defaultValue={[0]}
                         step={0.1}
                         aria-label="Volume">
@@ -216,7 +226,7 @@ const SelectBitrate = ({bitrate, setBitrate}) => (
                             Bitrate
                         </Select.Label>
                         <Select.Separator className="h-[1px] bg-violet6 m-[5px]"/>
-                        {BITRATES_KEYS.map(key => <SelectItem key={key} value={key}>{key}</SelectItem>)}
+                        {BITRATE_KEYS.map(key => <SelectItem key={key} value={key}>{key}</SelectItem>)}
                     </Select.Group>
                 </Select.Viewport>
                 <Select.ScrollDownButton
