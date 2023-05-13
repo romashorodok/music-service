@@ -1,9 +1,8 @@
 import styles from './page.module.scss'
-import {API_HOST} from "~/env";
 import AudioCard from "~/lib/components/audio-card";
 
 function getAudioList() {
-    return fetch(API_HOST.concat('/audios'), {
+    return fetch(`${process.env.NEXT_PUBLIC_API}/audios`, {
         cache: 'no-cache'
     }).then(r => r.json());
 }

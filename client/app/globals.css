@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --font: 'Darker Grotesque', sans-serif;
+  --font: sans-serif;
   --dark-background: #181818;
 
   --dark-primary: #232323;
