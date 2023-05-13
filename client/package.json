@@ -9,8 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.8.13",
-    "@improbable-eng/grpc-web-node-http-transport": "^0.15.0",
     "@radix-ui/colors": "^0.1.8",
     "@radix-ui/react-aspect-ratio": "^1.0.2",
     "@radix-ui/react-form": "^0.0.2",
@@ -25,7 +23,6 @@
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
     "next": "13.2.4",
-    "protobufjs": "^7.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "shaka-player": "^4.3.6",
