@@ -39,7 +39,7 @@ type TranscoderService struct {
 	miniosvc *storage.MinioService
 	producer *kafka.Producer
 
-	TRANSOCDE_CALLBACK string
+	TRANSCODE_CALLBACK string
 }
 
 var creds = &storage.MinioCredentials{
@@ -129,7 +129,7 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 		return err
 	}
 
-	resp, err := http.Post(s.TRANSOCDE_CALLBACK, "application/json", bytes.NewReader(data))
+	resp, err := http.Post(s.TRANSCODE_CALLBACK, "application/json", bytes.NewReader(data))
 
 	if err != nil {
 		log.Println("Cannot send post request")

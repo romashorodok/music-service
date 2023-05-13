@@ -17,7 +17,7 @@ const (
 	KAFKA = "localhost:9092"
 
 	TRANSCODE_AUDIO_TOPIC = "transcode-audio-topic"
-	TRANSOCDE_CALLBACK    = "http://localhost:8000/api/transcode"
+	TRANSCODE_CALLBACK    = "http://localhost:8000/api/transcode"
 )
 
 type TranscodeAudioTopic struct {
@@ -64,7 +64,7 @@ func processTopicMessages(ctx context.Context, topicChan <-chan *consumer.Box[*T
 	}()
 
 	transcodesvc := transcoder.NewTranscoderService(&ctx, p)
-	transcodesvc.TRANSOCDE_CALLBACK = TRANSOCDE_CALLBACK
+	transcodesvc.TRANSCODE_CALLBACK = TRANSCODE_CALLBACK
 
 	workerPool := make(chan struct{}, numWorkers)
 	for i := 0; i < numWorkers; i++ {
