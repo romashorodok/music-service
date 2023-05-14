@@ -68,7 +68,7 @@ class Audio extends Model
     {
         $segmentBucket = $this->segmentBucket()->first();
 
-        return $segmentBucket['manifest_file'];
+        return $segmentBucket['manifest_file'] ?? null;
     }
 
     public function manifest(): Attribute
@@ -82,7 +82,7 @@ class Audio extends Model
     {
         $image = $this->images()->first();
 
-        return $image['original_image'];
+        return $image['original_image'] ?? null;
     }
 
     public function image(): Attribute
