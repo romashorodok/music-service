@@ -10,9 +10,14 @@ trait StorageFilesProvider
     {
         $sourceFilesPath = storage_path($dir);
         $files = [];
+        $blacklistedFileNames = ['.DS_Store', '.gitkeep'];
 
         foreach (new \FilesystemIterator($sourceFilesPath) as $file) {
-            $files[] = $file->getRealPath();
+            $filename = $file->getFilename();
+
+            if (!in_array($filename, $blacklistedFileNames)) {
+                $files[] = $file->getRealPath();
+            }
         }
 
         return $files;
