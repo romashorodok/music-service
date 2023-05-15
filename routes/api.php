@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\AudioController;
+use App\Http\Controllers\Api\AuthenticateController;
 use App\Http\Controllers\Api\TranscodeController as TranscodeControllerAlias;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,17 +18,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 Route::group([], function () {
     Route::group([], function () {
         Route::post('transcode', [TranscodeControllerAlias::class, 'successfullyProcessed']);
     });
 
+    Route::middleware('api.token')->get('/user', function (Request $request) {
+        return Auth::guard('api')->user();
+    });
+
     Route::group([], function () {
         Route::get('audios/{audio}', [AudioController::class, 'getAudioById']);
         Route::get('audios', [AudioController::class, 'getAudioList']);
+    });
+
+    Route::group([], function () {
+        Route::post('auth/login', [AuthenticateController::class, "login"]);
     });
 });
