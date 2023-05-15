@@ -35,5 +35,6 @@ Route::group([], function () {
 
     Route::group([], function () {
         Route::post('auth/login', [AuthenticateController::class, "login"]);
+        Route::post('auth/register', [AuthenticateController::class, 'register']);
     });
 });
