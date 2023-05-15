@@ -12,5 +12,4 @@ class Authenticate extends Middleware
     {
         return Auth::guard('api')->check() ? $next($request) : response(['message' => "Unauthenticated"], 401);
     }
-
 }

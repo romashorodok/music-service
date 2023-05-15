@@ -40,5 +40,7 @@ Route::group([], function () {
         Route::group(['middleware' => ['api.token']], function () {
             Route::post('auth/logout', [AuthenticateController::class, 'logout']);
         });
+
+        Route::post('auth/refresh', [AuthenticateController::class, 'refresh']);
     });
 });
