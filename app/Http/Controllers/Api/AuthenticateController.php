@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthenticateController extends Controller
 {
@@ -44,5 +45,17 @@ class AuthenticateController extends Controller
         $user = User::query()->create([...$data, 'password' => Hash::make($data['password'])]);
 
         return response(['token' => $user->createToken(uniqid())->plainTextToken]);
+    }
+
+    public function logout(): Response
+    {
+        /* @var  User $user */
+        $user = Auth::guard('api')->user();
+
+        /* @var PersonalAccessToken $token */
+        $token = $user->currentAccessToken();
+        $token->delete();
+
+        return response(["message" => "Successful log out"]);
     }
 }

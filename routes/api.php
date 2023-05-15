@@ -36,5 +36,9 @@ Route::group([], function () {
     Route::group([], function () {
         Route::post('auth/login', [AuthenticateController::class, "login"]);
         Route::post('auth/register', [AuthenticateController::class, 'register']);
+
+        Route::group(['middleware' => ['api.token']], function () {
+            Route::post('auth/logout', [AuthenticateController::class, 'logout']);
+        });
     });
 });
