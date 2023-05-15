@@ -6,35 +6,38 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Authenticate\CredentialsRequest;
 use App\Http\Requests\Api\Authenticate\RegisterDataRequest;
 use App\Models\User;
+use App\Services\AuthenticateService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\MessageBag;
 
 class AuthenticateController extends Controller
 {
+
+    public function __construct(
+        private readonly AuthenticateService $authenticateService,
+        private readonly MessageBag          $messageBag,
+    )
+    {
+    }
 
     public function login(CredentialsRequest $request): Response
     {
         $email = $request->get('email');
         $password = $request->get('password');
 
-        $credentials = $request->validated();
-
         if (!$email && !$password) {
             return response(['message' => 'Unable to get email or password'], 422);
         }
 
-        $canLogin = Auth::attempt($credentials);
-        /* @var  User $user */
-        $user = Auth::user();
+        $user = $this->authenticateService->attemptLogin($email, $password);
 
-        if (!$canLogin || !$user) {
+        if (!$user) {
             return response(['message' => 'User dont exists'], 404);
         }
 
-        return response(['token' => $user->createToken(uniqid())->plainTextToken]);
+        return response(['token' => $this->authenticateService->createAccessToken($user)]);
     }
 
     public function register(RegisterDataRequest $request): Response
@@ -49,12 +52,7 @@ class AuthenticateController extends Controller
 
     public function logout(): Response
     {
-        /* @var  User $user */
-        $user = Auth::guard('api')->user();
-
-        /* @var PersonalAccessToken $token */
-        $token = $user->currentAccessToken();
-        $token->delete();
+        $this->authenticateService->logout();
 
         return response(['message' => 'Successful log out']);
     }
@@ -67,14 +65,13 @@ class AuthenticateController extends Controller
             return response(['message' => 'Empty authorization header'], 422);
         }
 
-        $token = PersonalAccessToken::findToken($bearerToken);
-
-        if (!$token) {
-            return response(['message' => 'Invalid access token']);
+        try {
+            return response(['token' => $this->authenticateService->refresh($bearerToken)]);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'errors' => $this->messageBag->toArray()
+            ], 500);
         }
-
-        $user = $token->tokenable()->first();
-
-        return response(['token' => $user->createToken(uniqid())->plainTextToken]);
     }
 }
