@@ -34,7 +34,7 @@ class AuthenticateController extends Controller
         $user = $this->authenticateService->attemptLogin($email, $password);
 
         if (!$user) {
-            return response(['message' => 'User dont exists'], 404);
+            return response(['message' => 'Provided wrong credentials or user dont exists'], 422);
         }
 
         return response(['token' => $this->authenticateService->createAccessToken($user)]);
