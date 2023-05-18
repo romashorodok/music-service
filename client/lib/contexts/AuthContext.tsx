@@ -21,9 +21,17 @@ export function AuthContextProvider({children}: React.PropsWithChildren) {
                 : null
         , []);
 
+    function onChangeAccessToken(accessToken: string) {
+        if (accessToken) {
+            localStorage.setItem(TOKEN_KEY, accessToken);
+        } else {
+            localStorage.removeItem(TOKEN_KEY);
+        }
+    }
+
     React.useEffect(() =>
             accessToken || typeof window !== "undefined"
-                ? localStorage.setItem(TOKEN_KEY, accessToken)
+                ? onChangeAccessToken(accessToken)
                 : null
         , [accessToken]);
 

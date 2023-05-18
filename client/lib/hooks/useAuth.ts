@@ -80,6 +80,19 @@ export default function useAuth() {
         }
     }
 
-    return {accessToken, setAccessToken, login, register, refreshTokenInterceptor}
+    async function logout() {
+        try {
+            const response = await axios.post(`${API_HOST}/auth/logout`);
+
+            setAccessToken(null);
+
+            return response;
+        } catch (e) {
+            console.error(e);
+            return Promise.reject(e);
+        }
+    }
+
+    return {accessToken, setAccessToken, login, register, logout, refreshTokenInterceptor}
 }
 

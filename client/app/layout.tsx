@@ -9,6 +9,7 @@ import {AuthContextProvider} from "~/lib/contexts/AuthContext";
 import Link from "next/link";
 import {HomeIcon, UploadIcon} from '@radix-ui/react-icons'
 import {AxiosInterceptorsContext} from "~/lib/contexts/AxiosInterceptorContext";
+import useAuth from "~/lib/hooks/useAuth";
 
 export default function RootLayout({children}: { children: React.ReactNode }) {
     return (
