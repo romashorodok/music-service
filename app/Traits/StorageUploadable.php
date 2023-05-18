@@ -23,7 +23,6 @@ trait StorageUploadable
 
         if ($exists) {
             Storage::disk($this->disk)->delete($filename);
-
         }
     }
 
@@ -51,6 +50,5 @@ trait StorageUploadable
         fclose($stream);
 
         return $filename;
-
     }
 }
