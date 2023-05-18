@@ -6,6 +6,7 @@ import {FormField} from "~/lib/components/Form/FormField";
 import {useForm} from "~/lib/hooks/useForm";
 import * as yup from 'yup';
 import useAuth from "~/lib/hooks/useAuth";
+import {useRouter} from "next/navigation";
 
 const schema = yup.object({
     email: yup.string()
@@ -32,12 +33,14 @@ export default function Page() {
     }, schema);
 
     const {register} = useAuth();
+    const {push} = useRouter();
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
 
         if (await validate()) {
             register(state)
+                .then(_ => push('/'))
                 .catch(({response}) => setMessages(response.data.errors));
         }
     }
