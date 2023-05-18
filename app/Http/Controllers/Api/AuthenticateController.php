@@ -28,13 +28,23 @@ class AuthenticateController extends Controller
         $password = $request->get('password');
 
         if (!$email && !$password) {
-            return response(['message' => 'Unable to get email or password'], 422);
+            return response([
+                'message' => 'Unable to get email or password',
+                'errors' => [
+                    'password' => ["Provided wrong credentials"]
+                ]
+            ], 422);
         }
 
         $user = $this->authenticateService->attemptLogin($email, $password);
 
         if (!$user) {
-            return response(['message' => 'Provided wrong credentials or user dont exists'], 422);
+            return response([
+                'message' => 'Provided wrong credentials',
+                'errors' => [
+                    'password' => ["Provided wrong credentials"]
+                ]
+            ], 422);
         }
 
         return response(['token' => $this->authenticateService->createAccessToken($user)]);
