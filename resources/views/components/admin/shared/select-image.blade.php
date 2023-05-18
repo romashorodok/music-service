@@ -20,13 +20,7 @@
 
 <div class="select-with-images">
     <div class="image-preview">
-        @if(count($entry->images))
-            @php
-                $image = $entry->images[0]
-            @endphp
-
-            <img src="{{ $image->original_image }}" alt="">
-        @endif
+        <img src="{{ $entry?->images[0]->original_image }}" alt=""/>
     </div>
 
     <button type="button" class="btn btn-secondary btn-select-image">
@@ -57,7 +51,7 @@
 <style>
     .select-with-images .image-grid {
         position: absolute;
-        z-index: 1;
+        z-index: 100;
         display: none;
         background-color: #fff;
         border: 1px solid #ccc;

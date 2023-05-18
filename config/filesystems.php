@@ -39,7 +39,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
@@ -56,6 +56,25 @@ return [
             'throw' => false,
         ],
 
+        'minio' => [
+            'audio' => [
+                'driver' => 'minio.audio',
+                'key' => env('MINIO_AUDIO_KEY'),
+                'secret' => env('MINIO_AUDIO_SECRET'),
+                'region' => env("MINIO_AUDIO_REGION"),
+                'bucket' => env('MINIO_AUDIO_BUCKET'),
+                'endpoint' => env('MINIO_AUDIO_ENDPOINT')
+            ],
+
+            'image' => [
+                'driver' => 'minio.image',
+                'key' => env('MINIO_IMAGE_KEY'),
+                'secret' => env('MINIO_IMAGE_SECRET'),
+                'region' => env("MINIO_IMAGE_REGION"),
+                'bucket' => env('MINIO_IMAGE_BUCKET'),
+                'endpoint' => env('MINIO_IMAGE_ENDPOINT')
+            ]
+        ]
     ],
 
     /*

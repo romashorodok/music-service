@@ -66,9 +66,10 @@ class ImageCrudController extends CrudController
         CRUD::setValidation(ImageRequest::class);
 
         CRUD::addField([
-            'label' => 'Chose image',
-            'type' => 'upload',
             'name' => 'original_image',
+            'label' => 'Chose image file',
+            'type' => 'view',
+            'view' => 'components.admin.shared.image-upload',
             'upload' => true,
         ]);
 

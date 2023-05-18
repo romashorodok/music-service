@@ -64,7 +64,6 @@ class AudioCrudController extends CrudController
             'view' => 'components.admin.audio.show-image'
         ]);
 
-
         /**
          * Columns can be defined using the fluent syntax or array syntax:
          * - CRUD::column('price')->type('number');
@@ -89,6 +88,14 @@ class AudioCrudController extends CrudController
             'label' => 'Image',
             'type' => 'view',
             'view' => 'components.admin.shared.select-image'
+        ]);
+
+        CRUD::addField([
+            'name' => 'original_audio_file',
+            'label' => 'Chose audio file',
+            'type' => 'view',
+            'view' => 'components.admin.shared.audio-upload',
+            'upload' => true,
         ]);
 
         CRUD::addField([

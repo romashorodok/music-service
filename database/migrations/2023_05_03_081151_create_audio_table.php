@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('audios', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('original_audio_file')->nullable();
         });
     }
 
