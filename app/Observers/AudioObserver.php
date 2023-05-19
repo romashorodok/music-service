@@ -38,6 +38,12 @@ class AudioObserver
         $bucket = $segmentBucket['bucket'] ?? null;
 
         try {
+            if (empty($manifest) || empty($bucket)) {
+                $this->transcodeService->transcode($audio);
+
+                return;
+            }
+
             $processing = $this->transcodeService->transcodeIfManifestNotExists($audio, $bucket, $manifest);
 
             if ($processing) {
