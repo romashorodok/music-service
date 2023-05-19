@@ -113,6 +113,7 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 
 	if err = pipeline.Run(); err != nil {
 		log.Println("Something goes wrong on pipeline", err)
+		return errors.New("failed processing")
 	}
 
 	for _, ffmpeg := range pipeline.Items {
@@ -152,7 +153,6 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 			respBody, _ := io.ReadAll(resp.Body)
 			log.Println("Processed", string(respBody))
 		}
-
 
 		if errCh != nil {
 			err = errors.New("cannot delete processing folder")

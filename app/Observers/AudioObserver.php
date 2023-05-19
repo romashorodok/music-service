@@ -2,32 +2,35 @@
 
 namespace App\Observers;
 
+use App\Exceptions\TranscodeAudioException;
 use App\Models\Audio;
 use App\Models\SegmentBucket;
-use App\Traits\TranscodeAudio;
+use App\Services\TranscodeService;
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 
 class AudioObserver
 {
-    use TranscodeAudio;
-
-    public function __construct(private readonly Filesystem $fs)
+    public function __construct(
+        private readonly TranscodeService $transcodeService,
+        private readonly Filesystem       $fs,
+    )
     {
     }
 
     /**
      * Handle the Audio "created" event.
      * @throws FilesystemException
+     * @throws TranscodeAudioException
      */
     public function created(Audio $audio): void
     {
-        $this->transcode($audio);
+        $this->transcodeService->transcode($audio);
     }
 
     /**
      * Handle the Audio "updated" event.
-     * @throws FilesystemException
      */
     public function updated(Audio $audio): void
     {
@@ -36,23 +39,16 @@ class AudioObserver
         $manifest = $segmentBucket['manifest_file'] ?? null;
         $bucket = $segmentBucket['bucket'] ?? null;
 
-        if ($manifest != null && $manifest != '') {
-            $exists = $this->fs->fileExists($bucket . "/" . $manifest);
+        try {
+            $processing = $this->transcodeService->transcodeIfManifestNotExists($audio, $bucket, $manifest);
 
-            if (!$exists) {
-                $this->transcode($audio);
+            if ($processing) {
                 return;
             }
-        }
 
-        $file = $audio->file();
-
-        if ($file != null && $file != '' && $segmentBucket) {
-            $sameSegments = $segmentBucket->segmentsOf($file);
-
-            if ($sameSegments) return;
-
-            $this->transcode($audio);
+            $this->transcodeService->transcodeIfSegmentOfAnotherFile($audio);
+        } catch (TranscodeAudioException|FilesystemException $e) {
+            Log::error($e->getMessage());
         }
     }
 
