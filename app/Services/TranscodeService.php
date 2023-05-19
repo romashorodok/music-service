@@ -33,7 +33,7 @@ class TranscodeService
     {
         $audioFile = $audio->getAttributes()['original_audio_file'] ?? null;
 
-        if ($audioFile == null && $audioFile == '') {
+        if (empty($audioFile)) {
             throw new TranscodeAudioException("Audio file is not exists");
         }
 
@@ -101,7 +101,7 @@ class TranscodeService
     {
         $file = $audio->file();
 
-        if ($file == null && $file == '') {
+        if (empty($file)) {
             return false;
         }
 
@@ -127,7 +127,7 @@ class TranscodeService
         $audioBucket = SegmentBucket::query()->firstWhere("id", $bucketId);
         $processingBucket = $audioBucket['processing_bucket'] ?? null;
 
-        if ($processingBucket == null) {
+        if (empty($processingBucket)) {
             throw new Exception("Don't have currently processing bucket");
         }
 
@@ -152,7 +152,7 @@ class TranscodeService
             'processing_bucket' => null,
         ]);
 
-        if ($mainBucket != null && $mainBucket != '') {
+        if (!empty($mainBucket)) {
             try {
                 $this->fs->deleteDirectory($mainBucket);
             } catch (FilesystemException $e) {

@@ -7,14 +7,12 @@ use App\Models\Audio;
 use App\Models\SegmentBucket;
 use App\Services\TranscodeService;
 use Illuminate\Support\Facades\Log;
-use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 
 class AudioObserver
 {
     public function __construct(
         private readonly TranscodeService $transcodeService,
-        private readonly Filesystem       $fs,
     )
     {
     }
