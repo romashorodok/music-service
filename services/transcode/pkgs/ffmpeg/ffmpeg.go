@@ -80,7 +80,7 @@ func (s *FFMpeg) Run() error {
 
 	process.Stdout = pipe
 
-	if err = process.Start(); err != nil {
+	if err = process.Run(); err != nil {
 		log.Printf("Something went wrong on fmpeg process for %s", s.Input)
 		return err
 	}
