@@ -5,7 +5,6 @@ namespace App\Observers;
 use App\Models\Audio;
 use App\Models\SegmentBucket;
 use App\Traits\TranscodeAudio;
-use Illuminate\Filesystem\FilesystemManager;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 
@@ -13,14 +12,8 @@ class AudioObserver
 {
     use TranscodeAudio;
 
-    private Filesystem $disk;
-
-    public function __construct(FilesystemManager $fs)
+    public function __construct(private readonly Filesystem $fs)
     {
-        /* @var Filesystem $disk */
-        $disk = $fs->disk('minio.segment');
-
-        $this->disk = $disk;
     }
 
     /**
@@ -40,11 +33,11 @@ class AudioObserver
     {
         /* @var SegmentBucket $segmentBucket */
         $segmentBucket = $audio->segmentBucket()->get(['segments_of_file', 'bucket', 'manifest_file'])->first();
-        $manifest = $segmentBucket['manifest_file'];
-        $bucket = $segmentBucket['bucket'];
+        $manifest = $segmentBucket['manifest_file'] ?? null;
+        $bucket = $segmentBucket['bucket'] ?? null;
 
         if ($manifest != null && $manifest != '') {
-            $exists = $this->disk->fileExists($bucket . "/" . $manifest);
+            $exists = $this->fs->fileExists($bucket . "/" . $manifest);
 
             if (!$exists) {
                 $this->transcode($audio);
@@ -54,7 +47,7 @@ class AudioObserver
 
         $file = $audio->file();
 
-        if ($file && $file != '') {
+        if ($file != null && $file != '' && $segmentBucket) {
             $sameSegments = $segmentBucket->segmentsOf($file);
 
             if ($sameSegments) return;
