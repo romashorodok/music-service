@@ -7,7 +7,6 @@ use App\Models\Audio;
 use App\Models\Genre;
 use App\Models\Image;
 use App\Models\User;
-use Database\Factories\Providers\GenreProvider;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,19 +17,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (GenreProvider::$genres as $genre) {
-            $genre = Genre::factory()->create([
-                'name' => $genre
-            ]);
+        $images = Image::factory(rand(1, 10))->create();
+        $albums = Album::factory(rand(1, 10))->create();
+        $genres = Genre::factory(rand(1, 10))->create();
 
-            Album::factory(rand(1, 10))->create()->each(function(Album $album) use ($genre) {
-                $image = Image::factory()->create();
+        $albums->each(function (Album $album) use ($images, $genres) {
+            $image = $images->random();
+            $album->images()->attach($image);
 
-                $album->images()->attach($image);
-
-                Audio::factory(rand(1, 10))->hasAttached($image)->hasAttached($genre)->hasAttached($album)->create();
-            });
-        }
+            Audio::factory(rand(1, 10))
+                ->hasAttached($album)
+                ->hasAttached($image)
+                ->hasAttached($genres->random())
+                ->create();
+        });
 
         User::factory()->create([
             'name' => 'test@test.test',

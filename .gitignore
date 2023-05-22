@@ -16,5 +16,8 @@ auth.json
 npm-debug.log
 yarn-error.log
 /.fleet
-/.idea
+.idea
 /.vscode
+tmp
+storage/audio
+.DS_Store

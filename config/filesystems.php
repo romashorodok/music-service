@@ -66,6 +66,15 @@ return [
                 'endpoint' => env('MINIO_AUDIO_ENDPOINT')
             ],
 
+            'segment' => [
+                'driver' => 'minio.segment',
+                'key' => env('MINIO_SEGMENT_KEY'),
+                'secret' => env('MINIO_SEGMENT_SECRET'),
+                'region' => env("MINIO_SEGMENT_REGION"),
+                'bucket' => env('MINIO_SEGMENT_BUCKET'),
+                'endpoint' => env('MINIO_SEGMENT_ENDPOINT')
+            ],
+
             'image' => [
                 'driver' => 'minio.image',
                 'key' => env('MINIO_IMAGE_KEY'),

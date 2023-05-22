@@ -21,4 +21,5 @@ Route::group([
     Route::crud('album', 'AlbumCrudController');
     Route::crud('audio', 'AudioCrudController');
     Route::crud('genre', 'GenreCrudController');
+    Route::crud('segment-bucket', 'SegmentBucketCrudController');
 }); // this should be the absolute last line of this file
