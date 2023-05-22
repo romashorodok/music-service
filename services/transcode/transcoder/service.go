@@ -52,6 +52,11 @@ var (
 	TRANSCODED_AUDIO_TOPIC = "transcoded-audio-topic"
 )
 
+var (
+	VERBOSE  = fragments.Verbose{}
+	LOGLEVEL = fragments.LogLevel{}
+)
+
 func NewTranscoderService(ctx *context.Context, producer *kafka.Producer) *TranscoderService {
 	minioPool, err := storage.NewMinioPool(4, creds)
 
@@ -94,19 +99,19 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_LOW,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_NORMAL,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_HIGHT,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 		},
 	}
