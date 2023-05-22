@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AudioController;
 use App\Http\Controllers\Api\AuthenticateController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TranscodeController as TranscodeControllerAlias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,5 +43,12 @@ Route::group([], function () {
         });
 
         Route::post('auth/refresh', [AuthenticateController::class, 'refresh']);
+    });
+
+    Route::group(['middleware' => ['api.token']], function () {
+        Route::post('subscription/customer', [SubscriptionController::class, 'createCustomer']);
+        Route::post('subscription/plans', [SubscriptionController::class, 'getSubscriptionPlans']);
+
+        Route::post('subscription', [SubscriptionController::class, 'createSubscription']);
     });
 });
