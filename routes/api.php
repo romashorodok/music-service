@@ -45,10 +45,13 @@ Route::group([], function () {
         Route::post('auth/refresh', [AuthenticateController::class, 'refresh']);
     });
 
+
+    Route::get('subscription/plans', [SubscriptionController::class, 'getSubscriptionPlans']);
+
     Route::group(['middleware' => ['api.token']], function () {
         Route::post('subscription/customer', [SubscriptionController::class, 'createCustomer']);
-        Route::post('subscription/plans', [SubscriptionController::class, 'getSubscriptionPlans']);
 
         Route::post('subscription', [SubscriptionController::class, 'createSubscription']);
+        Route::post('subscription/invoice', [SubscriptionController::class, 'getInvoiceInfo']);
     });
 });

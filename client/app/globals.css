@@ -48,3 +48,7 @@ a {
       background-color: var(--dark-background);
   }
 }
+
+.StripeElement iframe:focus-visible {
+    outline: none
+}

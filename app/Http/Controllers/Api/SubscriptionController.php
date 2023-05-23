@@ -59,7 +59,20 @@ class SubscriptionController extends Controller
             ],
         ]);
 
-        return response()->json($subscription);
+        return response()->json([
+            'subscription_id' => $subscription->id,
+            'payment_intent'  => $subscription->latest_invoice->payment_intent
+        ]);
+    }
+
+    /**
+     * @throws ApiErrorException
+     */
+    public function getInvoiceInfo(Request $request): JsonResponse
+    {
+        $paymentIntent = $request->get('payment_intent');
+
+        return response()->json($this->client->invoices->retrieve($paymentIntent['invoice']));
     }
 
     /**
