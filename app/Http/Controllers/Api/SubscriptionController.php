@@ -14,7 +14,7 @@ use Laravel\Cashier\Http\Controllers\WebhookController;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 
-class SubscriptionController extends WebhookController
+class SubscriptionController
 {
     public function __construct(
         private readonly StripeService $stripeService,
@@ -35,6 +35,14 @@ class SubscriptionController extends WebhookController
 
         } catch (CustomerAlreadyCreated $e) {
         }
+    }
+
+    public function getSubscriptionStatus()
+    {
+        /* @var User $user */
+        $user = Auth::guard('api')->user();
+
+        return response()->json($user->subscriptionStatus());
     }
 
     /**

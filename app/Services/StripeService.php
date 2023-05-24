@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Exceptions\InvalidCustomer;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Price;
+use Stripe\Product;
 use Stripe\StripeClient;
 use Stripe\Subscription;
 
@@ -19,6 +21,33 @@ class StripeService
         private readonly StripeClient $client
     )
     {
+    }
+
+    /**
+     * @throws ApiErrorException
+     */
+    private function getProduct(string $productId): Product
+    {
+        return $this->client->products->retrieve($productId);
+    }
+
+    /**
+     * @throws ApiErrorException
+     */
+    public function freshSubscription(string $subscriptionId, string $priceId,)
+    {
+        $price = $this->getPrice($priceId);
+        $subscription = $this->retrieveSubscription($subscriptionId);
+        $product = $this->getProduct($price->product);
+
+        $endsAt = Carbon::createFromTimestamp($subscription['current_period_end'])->toDateTimeString();
+
+        \Laravel\Cashier\Subscription::query()
+            ->where("stripe_id", "=", $subscription->id)
+            ->update([
+                'name' => $product->name,
+                'expires_at' => $endsAt,
+            ]);
     }
 
     /**

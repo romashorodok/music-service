@@ -14,6 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        Cashier::ignoreMigrations();
+
         $this->app->singleton(MessageBag::class, function () {
             return new MessageBag();
         });

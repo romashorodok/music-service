@@ -54,6 +54,7 @@ Route::group([], function () {
 
     Route::group(['middleware' => ['api.token']], function () {
         Route::post('subscription/customer', [SubscriptionController::class, 'createCustomer']);
+        Route::get('subscription/status', [SubscriptionController::class, 'getSubscriptionStatus']);
 
         Route::post('subscription', [SubscriptionController::class, 'createSubscription']);
         Route::post('subscription/invoice', [SubscriptionController::class, 'getInvoiceInfo']);
