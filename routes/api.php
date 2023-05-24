@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AudioController;
 use App\Http\Controllers\Api\AuthenticateController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TranscodeController as TranscodeControllerAlias;
+use App\Http\Controllers\Stripe\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,9 @@ Route::group([], function () {
 
 
     Route::get('subscription/plans', [SubscriptionController::class, 'getSubscriptionPlans']);
+
+    Route::post('stripe/webhook', [WebhookController::class, 'handler']);
+    Route::post('subscription/webhook', [SubscriptionController::class, 'webhookHandler']);
 
     Route::group(['middleware' => ['api.token']], function () {
         Route::post('subscription/customer', [SubscriptionController::class, 'createCustomer']);

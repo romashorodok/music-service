@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Laravel\Cashier\Exceptions\InvalidCustomer;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Price;
 use Stripe\StripeClient;
+use Stripe\Subscription;
 
 class StripeService
 {
@@ -16,6 +19,54 @@ class StripeService
         private readonly StripeClient $client
     )
     {
+    }
+
+    /**
+     * @throws ApiErrorException
+     */
+    private function retrieveSubscription(string $subscriptionId): Subscription
+    {
+        $subscription = $this->client->subscriptions->retrieve($subscriptionId);
+        $subscription['latest_invoice'] = $this->client->invoices->retrieve($subscription['latest_invoice']);
+        $subscription['latest_invoice']['payment_intent'] = $this->client->paymentIntents->retrieve($subscription['latest_invoice']['payment_intent']);
+
+        return $subscription;
+    }
+
+    /**
+     * @throws ApiErrorException
+     */
+    private function createSubscription(User $user, string $subscriptionPrice): Subscription
+    {
+        $customer = $user->asStripeCustomer();
+
+        return $this->client->subscriptions->create([
+            'customer' => $customer->id,
+            'payment_behavior' => 'default_incomplete',
+
+            'expand' => [
+                'latest_invoice.payment_intent'
+            ],
+            'items' => [
+                ['price' => $subscriptionPrice]
+            ],
+        ]);
+    }
+
+    /**
+     * @throws ApiErrorException
+     * @throws InvalidCustomer
+     */
+    public function getSubscriptionOrCreate(User $user, string $subscriptionPrice): Subscription
+    {
+        $subscription = $user->subscriptions()
+            ->where('stripe_status', '=', 'incomplete')
+            ->where('stripe_price', "=", $subscriptionPrice)
+            ->first();
+
+        return $subscription
+            ? $this->retrieveSubscription($subscription['stripe_id'])
+            : $this->createSubscription($user, $subscriptionPrice);
     }
 
     private function getProducts(): Collection
@@ -40,11 +91,11 @@ class StripeService
                 $price = $this->getPrice($product['price']);
 
                 return [
-                    'subscription_name'     => $name,
-                    'subscription_price'    => $price->id,
+                    'subscription_name' => $name,
+                    'subscription_price' => $price->id,
                     'subscription_currency' => $price->currency,
-                    'subscription_amount'   => $price->unit_amount / 100,
-                    'subscription_period'   => $price->recurring->interval ?? 'month',
+                    'subscription_amount' => $price->unit_amount / 100,
+                    'subscription_period' => $price->recurring->interval ?? 'month',
                 ];
             } catch (ApiErrorException $e) {
                 Log::error('Unable to get price for retrieving subscription plans. With message');

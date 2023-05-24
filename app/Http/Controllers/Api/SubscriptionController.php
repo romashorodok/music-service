@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Subscription\CreateSubscriptionRequest;
 use App\Models\User;
 use App\Services\StripeService;
@@ -10,10 +9,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Cashier\Exceptions\CustomerAlreadyCreated;
+use Laravel\Cashier\Exceptions\InvalidCustomer;
+use Laravel\Cashier\Http\Controllers\WebhookController;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 
-class SubscriptionController extends Controller
+class SubscriptionController extends WebhookController
 {
     public function __construct(
         private readonly StripeService $stripeService,
@@ -45,24 +46,19 @@ class SubscriptionController extends Controller
 
         /* @var User $user */
         $user = Auth::guard('api')->user();
-        $customer = $user->asStripeCustomer();
 
-        $subscription = $this->client->subscriptions->create([
-            'customer'         => $customer->id,
-            'payment_behavior' => 'default_incomplete',
+        try {
+            $subscription = $this->stripeService->getSubscriptionOrCreate($user, $subsPrice);
 
-            'expand' => [
-                'latest_invoice.payment_intent'
-            ],
-            'items'  => [
-                ['price' => $subsPrice]
-            ],
-        ]);
-
-        return response()->json([
-            'subscription_id' => $subscription->id,
-            'payment_intent'  => $subscription->latest_invoice->payment_intent
-        ]);
+            return response()->json([
+                'subscription_id' => $subscription->id,
+                'payment_intent' => $subscription->latest_invoice->payment_intent
+            ]);
+        } catch (InvalidCustomer) {
+            return response()->json([
+                "message" => "User is not stripe customer"
+            ], 412);
+        }
     }
 
     /**
