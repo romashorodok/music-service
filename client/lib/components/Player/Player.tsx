@@ -56,13 +56,9 @@ export default React.forwardRef<
     const [time, setTime] = React.useState<number>();
     const [duration, setDuration] = React.useState<number>();
 
-    const { setPlayer, audio, setPlaying, playing, bitrate, setBitrate } = usePlayer();
+    const { ALLOW_HIGH_BITRATE, setPlayer, audio, setPlaying, playing, bitrate, setBitrate } = usePlayer();
 
     const { subscriberAction } = useSubscription();
-
-    const ALLOW_HIGH_BITRATE = React.useMemo<boolean>(() => subscriberAction({
-        grants: ['UNLIMITED']
-    }), [subscriberAction]);
 
     const ALLOW_DURATION_CHANGE = React.useMemo<boolean>(() => subscriberAction({
         grants: ['UNLIMITED', 'EXTENDED']
