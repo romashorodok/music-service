@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Traits\StorageUploadable;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\FilesystemException;
 
 class Audio extends Model
 {
@@ -17,16 +18,14 @@ class Audio extends Model
     use HasFactory;
     use StorageUploadable;
 
-    /*
-    |--------------------------------------------------------------------------
-    | GLOBAL VARIABLES
-    |--------------------------------------------------------------------------
-    */
-
     protected $table = 'audios';
+
     public $timestamps = false;
+
     protected $guarded = ['id'];
+
     protected $hidden = ['original_audio_file'];
+  
     protected $appends = ['manifest', 'image'];
 
     private string $disk = 'minio.audio';
@@ -56,14 +55,6 @@ class Audio extends Model
         return $this->hasOne(SegmentBucket::class);
     }
 
-    public function originalAudioFile(): Attribute
-    {
-        return Attribute::make(
-            get: fn($value) => $value == '' ? null : Storage::disk($this->disk)->publicUrl($value),
-            set: fn($value) => $this->upload('original_audio_file', $value)
-        );
-    }
-
     public function getManifest(): ?string
     {
         $segmentBucket = $this->segmentBucket()->first();
@@ -90,5 +81,20 @@ class Audio extends Model
         return Attribute::make(
             get: fn() => $this->getImage()
         );
+    }
+  
+    /**
+     * @throws FilesystemException
+     */
+    public function setOriginalAudioFileAttribute(?UploadedFile $source): void
+    {
+        $this->attributes['original_audio_file'] = $this->upload('original_audio_file', $source);
+    }
+
+    public function getOriginalAudioFileAttribute(?string $value): ?string
+    {
+        return empty($value)
+            ? null
+            : Storage::disk($this->disk)->publicUrl($value);
     }
 }

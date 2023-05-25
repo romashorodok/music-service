@@ -2,64 +2,57 @@
 
 namespace App\Observers;
 
+use App\Exceptions\TranscodeAudioException;
 use App\Models\Audio;
 use App\Models\SegmentBucket;
-use App\Traits\TranscodeAudio;
-use Illuminate\Filesystem\FilesystemManager;
-use League\Flysystem\Filesystem;
+use App\Services\TranscodeService;
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\FilesystemException;
 
 class AudioObserver
 {
-    use TranscodeAudio;
-
-    private Filesystem $disk;
-
-    public function __construct(FilesystemManager $fs)
+    public function __construct(
+        private readonly TranscodeService $transcodeService,
+    )
     {
-        /* @var Filesystem $disk */
-        $disk = $fs->disk('minio.segment');
-
-        $this->disk = $disk;
     }
 
     /**
      * Handle the Audio "created" event.
      * @throws FilesystemException
+     * @throws TranscodeAudioException
      */
     public function created(Audio $audio): void
     {
-        $this->transcode($audio);
+        $this->transcodeService->transcode($audio);
     }
 
     /**
      * Handle the Audio "updated" event.
-     * @throws FilesystemException
      */
     public function updated(Audio $audio): void
     {
         /* @var SegmentBucket $segmentBucket */
         $segmentBucket = $audio->segmentBucket()->get(['segments_of_file', 'bucket', 'manifest_file'])->first();
-        $manifest = $segmentBucket['manifest_file'];
-        $bucket = $segmentBucket['bucket'];
+        $manifest = $segmentBucket['manifest_file'] ?? null;
+        $bucket = $segmentBucket['bucket'] ?? null;
 
-        if ($manifest != null && $manifest != '') {
-            $exists = $this->disk->fileExists($bucket . "/" . $manifest);
+        try {
+            if (empty($manifest) || empty($bucket)) {
+                $this->transcodeService->transcode($audio);
 
-            if (!$exists) {
-                $this->transcode($audio);
                 return;
             }
-        }
 
-        $file = $audio->file();
+            $processing = $this->transcodeService->transcodeIfManifestNotExists($audio, $bucket, $manifest);
 
-        if ($file && $file != '') {
-            $sameSegments = $segmentBucket->segmentsOf($file);
+            if ($processing) {
+                return;
+            }
 
-            if ($sameSegments) return;
-
-            $this->transcode($audio);
+            $this->transcodeService->transcodeIfSegmentOfAnotherFile($audio);
+        } catch (TranscodeAudioException|FilesystemException $e) {
+            Log::error($e->getMessage());
         }
     }
 
