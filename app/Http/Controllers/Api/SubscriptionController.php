@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Cashier\Exceptions\CustomerAlreadyCreated;
 use Laravel\Cashier\Exceptions\InvalidCustomer;
-use Laravel\Cashier\Http\Controllers\WebhookController;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Plan } from "../types/Plan";
-import { SUBSCRIPTION_PLAN_KEY } from "~/app/subscribe/page";
+import { SUBSCRIPTION_PLAN_KEY } from "~/env";
 
 type Props = {
     plan: Plan

@@ -5,11 +5,10 @@ import { Appearance, StripeCardElement, StripeElementStyle, loadStripe } from "@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { API_HOST, STRIPE_PUBLISH_KEY } from "~/env";
+import { API_HOST, STRIPE_PUBLISH_KEY, SUBSCRIPTION_PLAN_KEY } from "~/env";
 import { Plan } from "~/lib/types/Plan";
 import * as Form from "@radix-ui/react-form";
 
-export const SUBSCRIPTION_PLAN_KEY = '_subscription_plan';
 
 const stripePromise = loadStripe(STRIPE_PUBLISH_KEY);
 

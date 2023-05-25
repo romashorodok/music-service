@@ -4,7 +4,9 @@ import { Plan, getPlanListFromRequest } from "~/lib/types/Plan";
 
 
 function getPlanList(): Promise<Array<Plan>> {
-    return fetch(`${API_HOST}/subscription/plans`)
+    return fetch(`${API_HOST}/subscription/plans`, {
+        cache: 'no-cache'
+    })
         .then(r => r.json())
         .then(getPlanListFromRequest);
 }
@@ -17,3 +19,4 @@ export default async function Plans() {
         {plans.map((plan, key) => (<PlanCard key={key} plan={plan} />))}
     </div>
 }
+

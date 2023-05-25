@@ -34,13 +34,13 @@ class StripeService
     /**
      * @throws ApiErrorException
      */
-    public function freshSubscription(string $subscriptionId, string $priceId,)
+    public function freshSubscription(string $subscriptionId, string $priceId): void
     {
         $price = $this->getPrice($priceId);
         $subscription = $this->retrieveSubscription($subscriptionId);
         $product = $this->getProduct($price->product);
 
-        $endsAt = Carbon::createFromTimestamp($subscription['current_period_end'])->toDateTimeString();
+        $endsAt = Carbon::createFromTimestamp($subscription['current_period_end']);
 
         \Laravel\Cashier\Subscription::query()
             ->where("stripe_id", "=", $subscription->id)
@@ -120,7 +120,7 @@ class StripeService
                 $price = $this->getPrice($product['price']);
 
                 return [
-                    'subscription_name' => $name,
+                    'subscription_name' => ucfirst($name),
                     'subscription_price' => $price->id,
                     'subscription_currency' => $price->currency,
                     'subscription_amount' => $price->unit_amount / 100,
