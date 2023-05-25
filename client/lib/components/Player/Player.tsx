@@ -60,11 +60,13 @@ export default React.forwardRef<
 
     const { subscriberAction } = useSubscription();
 
-    const ALLOW_HIGH_BITRATE = React.useMemo<boolean>(() =>
-        subscriberAction({
-            grants: ['UNLIMITED']
-        })
-        , [subscriberAction]);
+    const ALLOW_HIGH_BITRATE = React.useMemo<boolean>(() => subscriberAction({
+        grants: ['UNLIMITED']
+    }), [subscriberAction]);
+
+    const ALLOW_DURATION_CHANGE = React.useMemo<boolean>(() => subscriberAction({
+        grants: ['UNLIMITED', 'EXTENDED']
+    }), [subscriberAction]);
 
     React.useEffect(() => {
         setBitrate(ALLOW_HIGH_BITRATE ? "HIGH" : "NORMAL")
@@ -135,6 +137,12 @@ export default React.forwardRef<
         setPlaying(false);
     }
 
+    function onUserChangeDuration(time: number) {
+        if (ALLOW_DURATION_CHANGE) {
+            playerRef.current.currentTime = time;
+        }
+    }
+
     return (
         <div className={`${className}`} {...props} ref={forwardedRef}>
             <audio ref={playerRef} />
@@ -156,12 +164,12 @@ export default React.forwardRef<
                         className={`relative flex items-center select-none touch-none w-[200px] h-5`}
                         value={[time]}
                         max={duration}
-                        onValueChange={([time]) => playerRef.current.currentTime = time}
+                        onValueChange={([time]) => onUserChangeDuration(time)}
                         defaultValue={[0]}
                         step={1}
                         aria-label="Volume">
-                        <Slider.Track className="bg-blackA10 relative grow rounded-full h-[3px]">
-                            <Slider.Range className="absolute bg-white rounded-full h-full" />
+                        <Slider.Track className={`relative grow rounded-full h-[3px] ${ALLOW_DURATION_CHANGE ? 'bg-blackA10' : 'bg-white'}`}>
+                            <Slider.Range className={`absolute bg-white rounded-full h-full`} />
                         </Slider.Track>
                         <Slider.Thumb
                             className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA7 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA8" />
