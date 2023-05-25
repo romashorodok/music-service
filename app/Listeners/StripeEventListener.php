@@ -26,11 +26,8 @@ class StripeEventListener
     /**
      * @throws ApiErrorException
      */
-    public function test(array $event)
+    public function updateSubscriptionBySuccessPayment(array $event): void
     {
-        $customer = $event['data']['object']['customer'];
-//        $user = User::query()->where('stripe_id', "=", $customer)->first();
-
         $priceId = $event['data']['object']['lines']['data'][0]['plan']['id'];
         $subscriptionId = $event['data']['object']['lines']['data'][0]['subscription'];
 
@@ -39,11 +36,12 @@ class StripeEventListener
 
     /**
      * Handle the event.
+     * @throws ApiErrorException
      */
     public function handle(WebhookReceived $event): void
     {
         match ($event->payload['type']) {
-            StripeEvent::PAYMENT_SUCCEDED->value => $this->test($event->payload),
+            StripeEvent::PAYMENT_SUCCEDED->value => $this->updateSubscriptionBySuccessPayment($event->payload),
 
             default => Log::info(sprintf("Received unhandled event %s", $event->payload['type']))
         };
