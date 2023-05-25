@@ -1,0 +1,22 @@
+
+.grid_area {
+    grid-template-rows: 1fr 1fr var(--player-grid-height);
+
+    grid-template-areas: "content content content"
+        "content content content"
+        "player player player";
+}
+
+.area_content {
+    grid-area: content;
+}
+
+.area_player {
+    grid-area: player;
+    height: auto;
+}
+
+.grid_audio_cards {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+

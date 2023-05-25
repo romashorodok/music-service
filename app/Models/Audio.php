@@ -24,6 +24,10 @@ class Audio extends Model
 
     protected $guarded = ['id'];
 
+    protected $hidden = ['original_audio_file'];
+  
+    protected $appends = ['manifest', 'image'];
+
     private string $disk = 'minio.audio';
 
     public function file(): ?string
@@ -51,6 +55,34 @@ class Audio extends Model
         return $this->hasOne(SegmentBucket::class);
     }
 
+    public function getManifest(): ?string
+    {
+        $segmentBucket = $this->segmentBucket()->first();
+
+        return $segmentBucket['manifest_file'] ?? null;
+    }
+
+    public function manifest(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getManifest(),
+        );
+    }
+
+    public function getImage(): ?string
+    {
+        $image = $this->images()->first();
+
+        return $image['original_image'] ?? null;
+    }
+
+    public function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getImage()
+        );
+    }
+  
     /**
      * @throws FilesystemException
      */
