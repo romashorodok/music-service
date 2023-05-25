@@ -1,3 +1,4 @@
+@use 'responsive' as responsive;
 
 .grid_area {
     grid-template-rows: var(--header-grid-height) 1fr 1fr var(--player-grid-height);
@@ -22,6 +23,22 @@
 }
 
 .grid_audio_cards {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 100%;
+
+    @include responsive.desktop {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+
+        padding: 2rem 5%;
+    }
+
+    @include responsive.tablet {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @include responsive.mobile {
+        grid-template-columns: 1fr;
+
+        padding: 2rem 5%;
+    }
 }
 

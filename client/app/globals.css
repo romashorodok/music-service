@@ -7,6 +7,7 @@
   --dark-background: #181818;
 
   --dark-primary: #232323;
+  --dark-secondary: #1c1c1c;
 
   --player-grid-height: 80px;
   --header-grid-height: 60px;
@@ -38,6 +39,10 @@ a {
 @media (prefers-color-scheme: dark) {
  .bg-primary {
      background-color: var(--dark-primary)
+ }
+
+ .bg-secondary {
+     background-color: var(--dark-secondary);
  }
 
   html {
