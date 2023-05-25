@@ -117,7 +117,7 @@ class StripeService
 
         return $products->map(function ($product, $name) {
             try {
-                $price = $this->getPrice($product['price']);
+                $price = $this->getPrice($product['product']);
 
                 return [
                     'subscription_name' => ucfirst($name),
