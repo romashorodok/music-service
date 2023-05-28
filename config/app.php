@@ -169,6 +169,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\MinioServiceProvider::class,
+        App\Providers\StripeServiceProvider::class,
     ])->toArray(),
 
     /*

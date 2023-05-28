@@ -6,6 +6,7 @@ import * as Toggle from '@radix-ui/react-toggle';
 import React, {useState} from "react";
 import {PlayIcon, StopIcon} from '@radix-ui/react-icons'
 import {Audio} from "~/lib/types/Audio";
+import "~/styles/components/audio-card.scss";
 
 type PlayButtonProps = {
     active?: boolean;
@@ -54,10 +55,10 @@ export default function ({audio}: Props) {
 
     return (
         <div onMouseEnter={() => setHoverButton(true)} onMouseLeave={() => setHoverButton(false)}
-             className="justify-self-center shadow-blackA7 w-[180px] h-[200px] overflow-hidden bg-primary rounded-lg">
-            <div className="flex flex-col p-4 w-full h-full">
-                <AspectRatio.Root ratio={4 / 3} className="relative w-full h-full">
-                    <img className="h-full w-full object-contain" src={audio.image} alt={audio.title}/>
+             className="audio_card_wrapper justify-self-center w-full overflow-hidden bg-primary rounded-lg shadow-[1px_1px_20px_black]">
+            <div className="flex flex-col p-4 w-full h-full place-items-center space-y-4">
+                <AspectRatio.Root ratio={5 / 4} className="rounded relative w-full h-full">
+                    <img className="audio_card_image h-full w-full object-contain" src={audio.image} alt={audio.title}/>
 
                     {hoverButton
                         ? <PlayButton
@@ -80,7 +81,7 @@ export default function ({audio}: Props) {
                         : null}
 
                 </AspectRatio.Root>
-                <h4 className="flex-[2] text-lg font-bold h-[36px] overflow-hidden overflow-ellipsis">{audio.title}</h4>
+                <h4 className="audio_card_title flex-[2] text-lg font-bold overflow-hidden overflow-ellipsis">{audio.title}</h4>
             </div>
         </div>
     )

@@ -1,0 +1,15 @@
+@use "../responsive" as responsive;
+
+.plans_wrapper {
+    @include responsive.desktop {
+        flex-direction: row;
+    }
+
+    @include responsive.tablet {
+        flex-direction: column;
+    }
+
+    @include responsive.mobile {
+        flex-direction: column;
+    }
+}

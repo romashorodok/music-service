@@ -1,0 +1,7 @@
+@use '../responsive' as responsive;
+
+.subscribe_wrapper {
+    @include responsive.mobile {
+        width: 317px;
+    }
+}

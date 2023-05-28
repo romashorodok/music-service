@@ -25,9 +25,11 @@ export default function () {
                 <div className="flex flex-[2] w-full justify-center">
                     <Player/>
                 </div>
-                <div className="flex-[1] w-full">
-                    <BitrateControl/>
+                <div className="flex flex-[1] w-full">
                     <VolumeControl/>
+                    <div className="mx-4">
+                        <BitrateControl/>
+                    </div>
                 </div>
             </div>
         </div>
