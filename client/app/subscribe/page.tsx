@@ -21,6 +21,10 @@ export default function Subscribe() {
     const [subscription, setSubscription] = React.useState<Subscription>(undefined);
 
     React.useMemo(async () => {
+        if (typeof window === "undefined") {
+            return;
+        }
+
         const plan: Plan = JSON.parse(sessionStorage.getItem(SUBSCRIPTION_PLAN_KEY) || undefined);
 
         if (!plan) {
@@ -39,7 +43,9 @@ export default function Subscribe() {
     return (
         <div className="relative flex place-items-center justify-center w-full h-full">
             <div className={`${styles.subscribe_wrapper} w-[400px] space-y-4`}>
-                <PlanCard plan={plan} />
+                {plan
+                    ? <PlanCard plan={plan} />
+                    : null}
 
                 {subscription
                     ? <PaymentElementProvider subscription={subscription} />
@@ -142,7 +148,7 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
             return;
         }
 
-        setStripeError({ message: "Something goes wrong."} as StripeError);
+        setStripeError({ message: "Something goes wrong." } as StripeError);
         return;
     }
 
