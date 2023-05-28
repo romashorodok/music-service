@@ -103,6 +103,7 @@ const stripePaymentCardStyles: StripeElementStyle = {
 function PaymentForm({ subscription }: { subscription: Subscription }) {
     const elements = useElements();
     const stripe = useStripe();
+    const router = useRouter();
 
     const [card, setCard] = React.useState<StripeCardElement>(null);
     const [cardError, setStripeError] = React.useState<StripeError>(null);
@@ -133,7 +134,16 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
 
         if (result.error) {
             setStripeError(result.error);
+            return;
         }
+
+        if (result.paymentIntent) {
+            router.push("/");
+            return;
+        }
+
+        setStripeError({ message: "Something goes wrong."} as StripeError);
+        return;
     }
 
     return (
