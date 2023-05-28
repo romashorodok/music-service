@@ -12,14 +12,12 @@ trait SubscriptionStatus
 {
     public function subscriptionStatus(): Collection
     {
-        return $this->subscriptions()
-            ->select(
-                'name',
-                DB::raw('stripe_price AS subscription_price'),
-                DB::raw('MAX(expires_at) AS expires_at')
-            )
-            ->where('stripe_status', '=', 'active')
-            ->groupBy('name', 'stripe_price', 'created_at')
+        return DB::table('subscriptions')
+            ->select('name', 'stripe_price', DB::raw('MAX(expires_at) AS expires_at'))
+            ->where('user_id', "=", $this['id'])
+            ->where('stripe_status', "=", "active")
+            ->where("expires_at", ">", Carbon::now())
+            ->groupBy('name', 'stripe_price')
             ->get();
     }
 }

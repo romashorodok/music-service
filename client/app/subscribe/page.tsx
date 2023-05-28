@@ -1,14 +1,16 @@
 'use client'
 
-import { CardElement, Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { Appearance, StripeCardElement, StripeElementStyle, loadStripe } from "@stripe/stripe-js";
+import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import { Appearance, StripeCardElement, StripeElementStyle, StripeError, loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { API_HOST, STRIPE_PUBLISH_KEY, SUBSCRIPTION_PLAN_KEY } from "~/env";
 import { Plan } from "~/lib/types/Plan";
 import * as Form from "@radix-ui/react-form";
-
+import { GRANTS } from "~/lib/hooks/useSubscription";
+import * as Separator from '@radix-ui/react-separator';
+import styles from './page.module.scss';
 
 const stripePromise = loadStripe(STRIPE_PUBLISH_KEY);
 
@@ -35,16 +37,20 @@ export default function Subscribe() {
     }, []);
 
     return (
-        <div className="">
-            <div className="w-[50%] my-[20px] mx-[auto] space-y-4">
-                <h2 className="text-lg">Your plan</h2>
-
+        <div className="relative flex place-items-center justify-center w-full h-full">
+            <div className={`${styles.subscribe_wrapper} w-[400px] space-y-4`}>
                 <PlanCard plan={plan} />
 
                 {subscription
                     ? <PaymentElementProvider subscription={subscription} />
                     : <p>Loading...</p>}
 
+                <div className="absolute right-4 bottom-1 p-4 overflow-hidden bg-primary rounded-lg shadow-[1px_1px_20px_black]">
+                    <p>valid card: 4242424242424242</p>
+                    <p>invalid card: 4000000000000002</p>
+                    <p>exp date: any feature</p>
+                    <p>cvc: any three numbers</p>
+                </div>
             </div>
         </div>
     )
@@ -99,6 +105,7 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
     const stripe = useStripe();
 
     const [card, setCard] = React.useState<StripeCardElement>(null);
+    const [cardError, setStripeError] = React.useState<StripeError>(null);
 
     React.useEffect(() => {
         if (elements) {
@@ -110,6 +117,7 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
         if (card) {
             card.update({
                 style: stripePaymentCardStyles,
+                hidePostalCode: true,
             });
         }
     }, [card]);
@@ -123,14 +131,30 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
             }
         });
 
-        console.log(result);
+        if (result.error) {
+            setStripeError(result.error);
+        }
     }
 
     return (
         <Form.Root className="space-y-4" onSubmit={OnSubmit}>
-            <div className="p-3 w-full h-full overflow-hidden bg-primary rounded shadow-[1px_1px_20px_black]">
-                <CardElement />
-            </div>
+            <Form.Field name="card">
+                {cardError
+                    ? (
+
+                        <div className="flex flex-col-reverse text-right">
+                            <Form.Message className="text-base text-red-400 font-italic opacity-[0.8]">
+                                {cardError.message}
+                            </Form.Message>
+                        </div>
+
+                    )
+                    : null
+                }
+                <div className="p-3 w-full h-full overflow-hidden bg-primary rounded shadow-[1px_1px_20px_black]">
+                    <CardElement />
+                </div>
+            </Form.Field>
 
             <Form.Submit asChild>
                 <button type="submit"
@@ -143,12 +167,22 @@ function PaymentForm({ subscription }: { subscription: Subscription }) {
 }
 
 function PlanCard({ plan }: { plan: Plan }) {
+    const subscriptionGrantsDescription: Array<string> = GRANTS[plan.name.toUpperCase()];
+
     return (
-        <div className="p-4 w-full h-full overflow-hidden bg-primary rounded shadow-[1px_1px_20px_black]">
-            <h3>{plan.name}</h3>
-            <h3>{plan.period}</h3>
-            <h3>{plan.amount}</h3>
-            <h3>{plan.priceId}</h3>
+        <div className="relative p-4 overflow-hidden bg-primary rounded-lg shadow-[1px_1px_20px_black]">
+            <div>
+                <h2 className="text-lg font-bold">{plan.name} plan</h2>
+                <p className="font-light">${plan.amount} / {plan.period}</p>
+                <Separator.Root className="bg-violet6 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px my-[15px]" />
+                <ul className="list-disc list-inside">
+                    {subscriptionGrantsDescription.map((description, key) => (
+                        <li key={key}>
+                            {description}
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </div>
     );
 }

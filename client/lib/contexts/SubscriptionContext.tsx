@@ -7,13 +7,15 @@ import { API_HOST } from "~/env";
 
 export type Subscription = {
     name: string;
-    subscription_price: string;
+    stripe_price: string;
 }
 
 export const SubscriptionContext = React.createContext<{
     subscriptions: Array<Subscription>;
+    setSubscriptions: React.Dispatch<React.SetStateAction<Array<Subscription>>>
 }>({
-    subscriptions: []
+    subscriptions: [],
+    setSubscriptions: null,
 });
 
 export function SubscriptionContextProvider({ children }: React.PropsWithChildren) {
@@ -34,7 +36,7 @@ export function SubscriptionContextProvider({ children }: React.PropsWithChildre
     }, [accessToken])
 
     return (
-        <SubscriptionContext.Provider value={{ subscriptions }}>
+        <SubscriptionContext.Provider value={{ subscriptions, setSubscriptions }}>
             {children}
         </SubscriptionContext.Provider>
     );
