@@ -63,7 +63,9 @@ return [
                 'secret' => env('MINIO_AUDIO_SECRET'),
                 'region' => env("MINIO_AUDIO_REGION"),
                 'bucket' => env('MINIO_AUDIO_BUCKET'),
-                'endpoint' => env('MINIO_AUDIO_ENDPOINT')
+                'endpoint' => env('MINIO_AUDIO_ENDPOINT'),
+                'public' => env('MINIO_PUBLIC_AUDIO_ENDPOINT')
+
             ],
 
             'segment' => [
@@ -72,7 +74,8 @@ return [
                 'secret' => env('MINIO_SEGMENT_SECRET'),
                 'region' => env("MINIO_SEGMENT_REGION"),
                 'bucket' => env('MINIO_SEGMENT_BUCKET'),
-                'endpoint' => env('MINIO_SEGMENT_ENDPOINT')
+                'endpoint' => env('MINIO_SEGMENT_ENDPOINT'),
+                'public' => env('MINIO_PUBLIC_SEGMENT_ENDPOINT'),
             ],
 
             'image' => [
@@ -81,7 +84,8 @@ return [
                 'secret' => env('MINIO_IMAGE_SECRET'),
                 'region' => env("MINIO_IMAGE_REGION"),
                 'bucket' => env('MINIO_IMAGE_BUCKET'),
-                'endpoint' => env('MINIO_IMAGE_ENDPOINT')
+                'endpoint' => env('MINIO_IMAGE_ENDPOINT'),
+                'public' => env('MINIO_PUBLIC_IMAGE_ENDPOINT'),
             ]
         ]
     ],
