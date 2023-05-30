@@ -19,27 +19,19 @@ class MinioServiceProvider extends ServiceProvider
         //
     }
 
-    private function readonlyBucketPolicy($bucket)
+    private function readonlyBucketPolicy($bucket): string
     {
-        $version = "2012-10-17";
-        $effect = "Allow";
-        $principal = "*";
-        $action = "s3:GetObject";
-        $resource = sprintf("arn:aws:s3:::%s/*", $bucket);
-
-        $policy = array(
-            "Version" => $version,
-            "Statement" => array(
-                array(
-                    "Effect" => $effect,
-                    "Principal" => $principal,
-                    "Action" => $action,
-                    "Resource" => $resource
-                )
-            )
-        );
-
-        return json_encode($policy);
+        return json_encode([
+            "Version" => "2012-10-17",
+            "Statement" => [
+                [
+                    "Effect" => "Allow",
+                    "Principal" => "*",
+                    "Action" => "s3:GetObject",
+                    "Resource" => "arn:aws:s3:::" . $bucket . "/*"
+                ]
+            ]
+        ]);
     }
 
     private function initClient($config): Filesystem
