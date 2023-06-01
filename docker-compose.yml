@@ -46,6 +46,21 @@ services:
     networks:
       - my-bridge
 
+  client:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./client
+    container_name: client
+    environment:
+      NEXT_PUBLIC_API: http://localhost/api
+      NEXT_PUBLIC_INTERNAL_API: http://nginx/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - my-bridge
+
   nginx:
     image: nginx:alpine3.17
     ports:

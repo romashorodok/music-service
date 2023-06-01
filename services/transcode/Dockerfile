@@ -18,6 +18,6 @@ RUN curl -L https://github.com/shaka-project/shaka-packager/releases/download/v2
 
 RUN chmod +x /usr/local/bin/packager
 
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get install -y ffmpeg
 
 CMD ["/bin/transcode"]
