@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
+use App\Models\User;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->when(AudioObserver::class)->needs(Filesystem::class)->give(fn() => Storage::disk('minio.segment'));
         $this->app->when(TranscodeService::class)->needs(Filesystem::class)->give(fn () => Storage::disk('minio.segment'));
+        Cashier::ignoreMigrations();
+
         $this->app->singleton(MessageBag::class, function () {
             return new MessageBag();
         });
@@ -28,6 +34,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Cashier::useCustomerModel(User::class);
     }
 }

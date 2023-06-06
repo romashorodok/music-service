@@ -1,7 +1,8 @@
 'use client'
 
 import React from "react";
-import {Audio} from "~/lib/types/Audio";
+import { Audio } from "~/lib/types/Audio";
+import { useSubscription } from "../hooks/useSubscription";
 
 type PlayableAudioContext = {
     audio: Audio;
@@ -38,12 +39,13 @@ function validManifest(audio: Audio): boolean {
     return audio.manifest && audio.manifest != '';
 }
 
-export function PlayerProvider({children}: React.PropsWithChildren) {
+export function PlayerProvider({ children }: React.PropsWithChildren) {
+
     const [audio, setAudio] = React.useState<Audio>();
     const [player, setPlayer] = React.useState<HTMLAudioElement>();
     const [playing, setPlaying] = React.useState(false);
     const [volume, setVolume] = React.useState(DEFAULT_VOLUME);
-    const [bitrate, setBitrate] = React.useState<BITRATE>('HIGH');
+    const [bitrate, setBitrate] = React.useState<BITRATE>(null);
 
     const context = React.useMemo<PlayableAudioContext>(() => ({
         audio, setAudio,

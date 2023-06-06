@@ -1,0 +1,39 @@
+@use '../../app/responsive' as responsive;
+
+.audio_card_wrapper {
+    @include responsive.desktop {
+        max-width: 300px;
+    }
+
+    @include responsive.tablet {
+        max-width: 250px;
+    }
+
+    @include responsive.mobile {
+        max-width: 80%;
+    }
+}
+
+.audio_card_title {
+    line-height: 100%;
+    max-height: 35px;
+    text-align: center;
+
+    @include responsive.desktop {
+        max-width: 80%;
+        max-height: 70px;
+    }
+
+    @include responsive.mobile {
+        max-width: 70%;
+    }
+
+    @include responsive.mobile {
+        max-width: 80%;
+    }
+}
+
+.audio_card_image {
+    padding: 10px;
+    border-radius: 5px;
+}
