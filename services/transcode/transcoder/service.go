@@ -37,15 +37,10 @@ type TranscodeData struct {
 type TranscoderService struct {
 	ctx      *context.Context
 	miniosvc *storage.MinioService
+	creds    *storage.MinioCredentials
 	producer *kafka.Producer
 
 	TRANSCODE_CALLBACK string
-}
-
-var creds = &storage.MinioCredentials{
-	User:     "minioadmin",
-	Password: "minioadmin",
-	Endpoint: "localhost:9000",
 }
 
 var (
@@ -57,8 +52,8 @@ var (
 	LOGLEVEL = fragments.LogLevel{}
 )
 
-func NewTranscoderService(ctx *context.Context, producer *kafka.Producer) *TranscoderService {
-	minioPool, err := storage.NewMinioPool(4, creds)
+func NewTranscoderService(ctx *context.Context, minioCredentials *storage.MinioCredentials, producer *kafka.Producer) *TranscoderService {
+	minioPool, err := storage.NewMinioPool(4, minioCredentials)
 
 	if err != nil {
 		log.Panic("Cannot init minio pool clients. Error: ", err)
@@ -67,6 +62,7 @@ func NewTranscoderService(ctx *context.Context, producer *kafka.Producer) *Trans
 	return &TranscoderService{
 		ctx:      ctx,
 		miniosvc: &storage.MinioService{Pool: minioPool},
+		creds:    minioCredentials,
 		producer: producer,
 	}
 }
@@ -135,45 +131,54 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 		return err
 	}
 
-	resp, err := http.Post(s.TRANSCODE_CALLBACK, "application/json", bytes.NewReader(data))
+	err = s.OnSuccessProcessingCallCallback(bytes.NewReader(data))
 
 	if err != nil {
-		log.Println("Cannot send post request")
 		errCh := s.miniosvc.DeleteObjectsRecur(*s.ctx, t.SegmentBucket, t.ProcessingBucket)
+
+		log.Println("Delete segments for", t.ProcessingBucket)
 
 		if errCh != nil {
 			err = errors.New("cannot delete processing folder")
 		}
+	}
 
+	return err
+}
+
+func (s *TranscoderService) OnSuccessProcessingCallCallback(dataReader *bytes.Reader) error {
+	client := &http.Client{}
+
+	req, err := http.NewRequest("POST", s.TRANSCODE_CALLBACK, dataReader)
+
+	if err != nil {
+		log.Println("Unable form request", err)
+		return err
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		log.Println("Unable do request", err)
 		return err
 	}
 
 	if resp.StatusCode != 200 {
-		log.Println("Catch after post request", resp.Status)
-		errCh := s.miniosvc.DeleteObjectsRecur(*s.ctx, t.SegmentBucket, t.ProcessingBucket)
+		log.Println("Catch after success callback post request", resp.Status)
 
-		contentType := resp.Header.Get("Content-Type")
+		message, _ := io.ReadAll(resp.Body)
 
-		if contentType == "application/json" {
-			respBody, _ := io.ReadAll(resp.Body)
-			log.Println("Processed", string(respBody))
-		}
+		log.Println(string(message))
 
-		if errCh != nil {
-			err = errors.New("cannot delete processing folder")
-		}
-
-		return err
+		return errors.New("failed success request")
 	}
 
-	contentType := resp.Header.Get("Content-Type")
+	defer resp.Body.Close()
 
-	if contentType == "application/json" {
-		respBody, _ := io.ReadAll(resp.Body)
-		log.Println("Processed", string(respBody))
-	}
-
-	return err
+	return nil
 }
 
 type FileBox struct {
@@ -182,7 +187,7 @@ type FileBox struct {
 }
 
 func (s *TranscoderService) DeliverFiles(workdir, bucket string, subBucket string) {
-	clientPool := storage.AsyncMinioPool(10, creds)
+	clientPool := storage.AsyncMinioPool(10, s.creds)
 	files := make(chan *FileBox, 20)
 
 	var wg sync.WaitGroup
