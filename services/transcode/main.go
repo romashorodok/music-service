@@ -161,7 +161,7 @@ func main() {
 
 	containerChan := make(chan *consumer.Box[*TranscodeAudioTopic])
 	go consumer.ConsumeTopic(config, TRANSCODE_AUDIO_TOPIC, containerChan)
-	go transcoder.TopicProcessingWorkerPool(containerChan, 2)
+	go transcoder.TopicProcessingWorkerPool(containerChan, 1)
 
 	select {
 	case <-signals:
