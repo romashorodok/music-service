@@ -68,31 +68,17 @@ class Audio extends Model
             : Storage::disk($this->disk)->publicUrl($value);
     }
 
-    public function getManifest(): ?string
+    public function getManifestAttribute(): ?string
     {
         $segmentBucket = $this->segmentBucket()->first();
 
         return $segmentBucket['manifest_file'] ?? null;
     }
 
-    public function manifest(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->getManifest(),
-        );
-    }
-
-    public function getImage(): ?string
+    public function getImageAttribute(): ?string
     {
         $image = $this->images()->first();
 
         return $image['original_image'] ?? null;
-    }
-
-    public function image(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->getImage()
-        );
     }
 }

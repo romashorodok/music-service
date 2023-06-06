@@ -34,7 +34,9 @@ class TranscodeService
         $audioFile = $audio->getAttributes()['original_audio_file'] ?? null;
 
         if (empty($audioFile)) {
-            throw new TranscodeAudioException("Audio file is not exists");
+            Log::info('Audio file is not exists');
+
+            return false;
         }
 
         $processingBucket = Str::random(40);

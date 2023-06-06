@@ -9,8 +9,6 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
 use App\Models\User;
-use Illuminate\Support\MessageBag;
-use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider

@@ -141,6 +141,7 @@ func main() {
 		"auto.offset.reset":    "earliest",
 		"max.poll.interval.ms": 8000,
 		"session.timeout.ms":   6000,
+		"enable.auto.commit":   false,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
