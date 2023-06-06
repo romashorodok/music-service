@@ -75,7 +75,7 @@ func (t TranscodeAudio) TopicProcessingWorkerPool(topicChan <-chan *consumer.Box
 		producer,
 	)
 
-	transcodesvc.TRANSOCDE_CALLBACK = *t.TRANSCODE_CALLBACK
+	transcodesvc.TRANSCODE_CALLBACK = *t.TRANSCODE_CALLBACK
 
 	workerPool := make(chan struct{}, numWorkers)
 	for i := 0; i < numWorkers; i++ {
