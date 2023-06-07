@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 tmp
 storage/audio
+.DS_Store
