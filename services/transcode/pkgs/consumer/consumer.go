@@ -49,6 +49,7 @@ func pollMessages[F any](c *kafka.Consumer, out chan<- *Box[F]) {
 		switch t := msg.(type) {
 
 		case *kafka.Message:
+			_, _ = c.CommitMessage(t)
 			if err := pushMessage(c, t, out); err != nil {
 				log.Println("Error to push message", err)
 			}

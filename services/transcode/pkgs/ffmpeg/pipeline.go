@@ -2,13 +2,16 @@ package ffmpeg
 
 import (
 	"fmt"
-	"github.com/romashorodok/music-service/services/transcode/pkgs/shaka"
 	"log"
 	"os"
 	"os/signal"
 	"path"
 	"sync"
 	"syscall"
+
+	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/fragments"
+	"github.com/romashorodok/music-service/services/transcode/pkgs/reader"
+	"github.com/romashorodok/music-service/services/transcode/pkgs/shaka"
 
 	"github.com/google/uuid"
 )
@@ -43,9 +46,23 @@ func (s *FFMpegProcessingPipeline) Run() (err error) {
 	go func() {
 		for _, ffmpeg := range s.Items {
 			ffmpeg.Input = s.Sourcefile
+
 			if err = ffmpeg.Run(); err != nil {
 				log.Printf("Something goes wrong on ffmpeg process for %s", s.Sourcefile)
 				return
+			}
+
+
+			if contain := fragments.ContainFragment(&ffmpeg.Fragments, &fragments.LogLevel{}); contain {
+				logCh := make(chan string, 1024)
+
+				go reader.ChanReader(*ffmpeg.Stderr, logCh)
+
+				go func() {
+					for stderrLine := range logCh {
+						log.Println(stderrLine)
+					}
+				}()
 			}
 		}
 	}()

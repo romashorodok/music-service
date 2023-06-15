@@ -40,11 +40,16 @@ type TranscoderService struct {
 	creds    *storage.MinioCredentials
 	producer *kafka.Producer
 
-	TRANSOCDE_CALLBACK string
+	TRANSCODE_CALLBACK string
 }
 
 var (
 	TRANSCODED_AUDIO_TOPIC = "transcoded-audio-topic"
+)
+
+var (
+	VERBOSE  = fragments.Verbose{}
+	LOGLEVEL = fragments.LogLevel{}
 )
 
 func NewTranscoderService(ctx *context.Context, minioCredentials *storage.MinioCredentials, producer *kafka.Producer) *TranscoderService {
@@ -90,25 +95,26 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_LOW,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_NORMAL,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_HIGHT,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 		},
 	}
 
 	if err = pipeline.Run(); err != nil {
 		log.Println("Something goes wrong on pipeline", err)
+		return errors.New("failed processing")
 	}
 
 	for _, ffmpeg := range pipeline.Items {
@@ -143,7 +149,7 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 func (s *TranscoderService) OnSuccessProcessingCallCallback(dataReader *bytes.Reader) error {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", s.TRANSOCDE_CALLBACK, dataReader)
+	req, err := http.NewRequest("POST", s.TRANSCODE_CALLBACK, dataReader)
 
 	if err != nil {
 		log.Println("Unable form request", err)

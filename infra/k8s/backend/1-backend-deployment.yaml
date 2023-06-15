@@ -1,0 +1,107 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: music-service-backend:latest
+        imagePullPolicy: Never
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: host
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: port 
+          - name: DB_DATABASE 
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key:  database
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: username 
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: password 
+
+          # TODO: Make it dry
+          - name: MINIO_SEGMENT_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: internal-endpoint
+
+          - name: MINIO_IMAGE_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: internal-endpoint
+
+          - name: MINIO_AUDIO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: internal-endpoint
+
+          # TODO: Make it dry
+          - name: MINIO_PUBLIC_SEGMENT_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: external-endpoint
+
+          - name: MINIO_PUBLIC_IMAGE_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: external-endpoint
+
+          - name: MINIO_PUBLIC_AUDIO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-credentials
+                key: external-endpoint
+
+        ports:
+        - containerPort: 9000
+          name: php-fpm
+          protocol: TCP
+        volumeMounts:
+          - name: php-ini-config-volume
+            mountPath: /usr/local/etc/php/php.ini
+            subPath: php.ini
+
+      - name: packages 
+        image: music-service-packages:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+          name: packages-http
+          protocol: TCP
+
+      volumes:
+        - name: php-ini-config-volume
+          configMap:
+            name: php-ini-config
+

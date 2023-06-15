@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend
+  namespace: staging
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "fcgi"
+    nginx.ingress.kubernetes.io/fastcgi_buffers: "16 16k"
+    nginx.ingress.kubernetes.io/fastcgi_buffer_size: "32k"
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      fastcgi_param SCRIPT_FILENAME /var/www/public/index.php;
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: backend.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 9000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-packages
+  namespace: staging
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: backend.localhost
+    http:
+      paths:
+      - path: /packages/
+        pathType: Prefix
+        backend:
+          service:
+            name: backend 
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-minio
+  # Ingress must be in same namespace with balanced resource
+  namespace: minio-n
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: media.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name:  minio-service 
+            port:
+              number: 9000

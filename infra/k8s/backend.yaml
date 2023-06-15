@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: backend
+spec:
+  containers:
+    - name: backend
+      image: music-service-backend:latest

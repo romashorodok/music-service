@@ -26,4 +26,6 @@ RUN composer dump-autoload --optimize
 
 EXPOSE 80
 
+WORKDIR /var/www/public
+
 CMD ["php-fpm"]
