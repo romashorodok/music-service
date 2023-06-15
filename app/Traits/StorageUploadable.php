@@ -43,6 +43,7 @@ trait StorageUploadable
             return null;
         }
 
+        $source->getErrorMessage();
         $filename = $source->hashName();
 
         $stream = fopen($source, 'r+');
