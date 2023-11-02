@@ -20,7 +20,7 @@
 
 <div class="select-with-images">
     <div class="image-preview">
-        <img src="{{ $entry?->images[0]->original_image }}" alt=""/>
+        <img src="{{ $entry->images[0]->original_image ?? null }}" alt=""/>
     </div>
 
     <button type="button" class="btn btn-secondary btn-select-image">

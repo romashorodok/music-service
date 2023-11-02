@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Traits\StorageUploadable;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\FilesystemException;
 
 class Audio extends Model
 {
@@ -16,33 +18,19 @@ class Audio extends Model
     use HasFactory;
     use StorageUploadable;
 
-    /*
-    |--------------------------------------------------------------------------
-    | GLOBAL VARIABLES
-    |--------------------------------------------------------------------------
-    */
-
     protected $table = 'audios';
-    // protected $primaryKey = 'id';
+
     public $timestamps = false;
+
     protected $guarded = ['id'];
-    // protected $fillable = [];
-    // protected $hidden = [];
-    // protected $dates = [];
 
     private string $disk = 'minio.audio';
 
-    /*
-    |--------------------------------------------------------------------------
-    | FUNCTIONS
-    |--------------------------------------------------------------------------
-    */
+    public function file(): ?string
+    {
+        return $this->attributes['original_audio_file'] ?? null;
+    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONS
-    |--------------------------------------------------------------------------
-    */
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'audio_genre');
@@ -58,28 +46,23 @@ class Audio extends Model
         return $this->belongsToMany(Image::class, 'audio_image');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SCOPES
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESSORS
-    |--------------------------------------------------------------------------
-    */
-    public function originalAudioFile(): Attribute
+    public function segmentBucket(): HasOne
     {
-        return Attribute::make(
-            get: fn($value) => $value == '' ? null : Storage::disk($this->disk)->publicUrl($value),
-            set: fn($value) => $this->upload('original_audio_file', $value)
-        );
+        return $this->hasOne(SegmentBucket::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MUTATORS
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * @throws FilesystemException
+     */
+    public function setOriginalAudioFileAttribute(?UploadedFile $source): void
+    {
+        $this->attributes['original_audio_file'] = $this->upload('original_audio_file', $source);
+    }
+
+    public function getOriginalAudioFileAttribute(?string $value): ?string
+    {
+        return empty($value)
+            ? null
+            : Storage::disk($this->disk)->publicUrl($value);
+    }
 }

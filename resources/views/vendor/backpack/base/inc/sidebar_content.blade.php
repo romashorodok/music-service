@@ -6,3 +6,5 @@
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('album') }}"><i class="nav-icon la la-question"></i> Albums</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('audio') }}"><i class="nav-icon la la-question"></i> Audio</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ backpack_url('genre') }}"><i class="nav-icon la la-question"></i> Genres</a></li>
+
+<li class="nav-item"><a class="nav-link" href="{{ backpack_url('segment-bucket') }}"><i class="nav-icon la la-question"></i> Segment buckets</a></li>

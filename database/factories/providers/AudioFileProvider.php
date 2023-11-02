@@ -5,12 +5,12 @@ namespace Database\Factories\Providers;
 use Database\Factories\providers\traits\StorageFilesProvider;
 use Faker\Provider\Base;
 
-class ImageOriginalFileProvider extends Base
+class AudioFileProvider extends Base
 {
     use StorageFilesProvider;
 
-    static function originalFile(): string
+    static function audioFile(): string
     {
-        return self::randomElement(self::files('seed'));
+        return self::randomElement(self::files('audio'));
     }
 }
