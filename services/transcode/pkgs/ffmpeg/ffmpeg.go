@@ -3,19 +3,24 @@ package ffmpeg
 import (
 	"errors"
 	"fmt"
-	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/fragments"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
 
+	"github.com/romashorodok/music-service/services/transcode/pkgs/ffmpeg/fragments"
+
 	"github.com/google/uuid"
 )
 
 type FFMpeg struct {
+	Stderr *io.ReadCloser
+
 	Input string
 	Pipe  *string
+	LogCh chan string
 
 	Codec     string
 	Muxer     string
@@ -79,6 +84,16 @@ func (s *FFMpeg) Run() error {
 	defer pipe.Close()
 
 	process.Stdout = pipe
+
+	if contain := fragments.ContainFragment(&s.Fragments, &fragments.LogLevel{}); contain {
+		stderr, error := process.StderrPipe()
+
+		if error != nil {
+			log.Println("FFmpeg stderr log pipe cannot start, ", err)
+		}
+
+		s.Stderr = &stderr
+	}
 
 	if err = process.Start(); err != nil {
 		log.Printf("Something went wrong on fmpeg process for %s", s.Input)
