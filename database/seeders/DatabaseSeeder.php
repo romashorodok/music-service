@@ -26,6 +26,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
+        $this->createOne();
 
         // $images = Image::factory(rand(1, 10))->create();
         // $albums = Album::factory(rand(1, 10))->create();

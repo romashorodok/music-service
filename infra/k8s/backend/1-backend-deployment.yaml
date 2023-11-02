@@ -17,6 +17,7 @@ spec:
       containers:
       - name: backend
         image: music-service-backend:latest
+        # image:  k3d-myregistry.localhost:5000/music-service-backend:latest
         imagePullPolicy: Never
         env:
           - name: DB_HOST
@@ -82,6 +83,12 @@ spec:
               secretKeyRef:
                 name: minio-credentials
                 key: external-endpoint
+
+          - name: KAFKA_BROKERS
+            valueFrom:
+              secretKeyRef:
+                name: kafka-credentials
+                key: internal-kafka
 
         ports:
         - containerPort: 9000

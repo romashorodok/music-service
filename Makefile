@@ -2,6 +2,14 @@
 all:
 	kubectl apply --recursive -f ./infra/k8s
 
+cluster:
+	k3d cluster create music-service-cluster \
+        --agents 1 -p 8080:80@agent:0 -p 31820:31820/UDP@agent:0 \
+        --registry-create k3d-music-service-registry
+
+delete:
+	k3d cluster delete music-service-cluster
+
 registry:
 	docker run -d \
 		--restart=always \

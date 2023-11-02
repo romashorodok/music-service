@@ -99,11 +99,11 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.50"
-    #       memory: 512M
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
     command: server --console-address ":9001" /data
     networks:
       - my-bridge
