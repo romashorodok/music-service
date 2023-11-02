@@ -13,29 +13,35 @@ trait StorageUploadable
     /**
      * @throws FilesystemException
      */
-    private function cleanUp(Filesystem $client, ?string $filename): void
+    private function deleteFileIfExist(Filesystem $client, ?string $filename): void
     {
-        if ($filename != '') {
-            $exists = $client->fileExists($filename);
+        if ($filename === '' || $filename === null) {
+            return;
+        }
 
-            if ($exists) {
-                Storage::disk($this->disk)->delete($filename);
-            }
+        $exists = $client->fileExists($filename);
+
+        if ($exists) {
+            Storage::disk($this->disk)->delete($filename);
         }
     }
 
     /**
      * @throws FilesystemException
      */
-    public function upload(string $attribute, ?UploadedFile $source): ?string
+    public function upload(string $fileAttribute, ?UploadedFile $source): ?string
     {
         /* @var Filesystem $client */
         $client = Storage::disk($this->disk);
-        $filename = $this->attributes[$attribute] ?? null;
 
-        $this->cleanUp($client, $filename);
+        $this->deleteFileIfExist(
+            $client,
+            $this->attributes[$fileAttribute] ?? null
+        );
 
-        if ($source == null) return null;
+        if (!$source) {
+            return null;
+        }
 
         $filename = $source->hashName();
 
@@ -44,6 +50,5 @@ trait StorageUploadable
         fclose($stream);
 
         return $filename;
-
     }
 }

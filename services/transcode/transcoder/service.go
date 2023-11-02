@@ -40,16 +40,21 @@ type TranscoderService struct {
 	creds    *storage.MinioCredentials
 	producer *kafka.Producer
 
-	TRANSOCDE_CALLBACK string
+	TRANSCODE_CALLBACK string
 }
 
 var (
 	TRANSCODED_AUDIO_TOPIC = "transcoded-audio-topic"
 )
 
-func NewTranscoderService(ctx *context.Context, minioCredentials *storage.MinioCredentials, producer *kafka.Producer) *TranscoderService {
-	minioPool, err := storage.NewMinioPool(4, minioCredentials)
+var (
+	VERBOSE  = fragments.Verbose{}
+	LOGLEVEL = fragments.LogLevel{}
+)
 
+func NewTranscoderService(ctx *context.Context, minioCredentials *storage.MinioCredentials, producer *kafka.Producer) *TranscoderService {
+  minioPool, err := storage.NewMinioPool(4, minioCredentials)
+  
 	if err != nil {
 		log.Panic("Cannot init minio pool clients. Error: ", err)
 	}
@@ -90,25 +95,26 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_LOW,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &fragments.EchoEffect{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_NORMAL,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 			{
 				Codec:     codecs.VORBIS,
 				Muxer:     fragments.MUXER_WEBM,
 				Bitrate:   fragments.BITRATE_HIGHT,
-				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}},
+				Fragments: []fragments.FFMpegFragment{&fragments.NoMetadata{}, &VERBOSE, &LOGLEVEL},
 			},
 		},
 	}
 
 	if err = pipeline.Run(); err != nil {
 		log.Println("Something goes wrong on pipeline", err)
+		return errors.New("failed processing")
 	}
 
 	for _, ffmpeg := range pipeline.Items {

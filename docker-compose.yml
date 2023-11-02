@@ -19,7 +19,7 @@ services:
       resources:
         limits:
           cpus: "0.50"
-          memory: 512M
+          memory: 1G
     ports:
       - "3306:3306"
 
@@ -33,9 +33,9 @@ services:
       MINIO_IMAGE_ENDPOINT: http://host.docker.internal:9000
       MINIO_SEGMENT_ENDPOINT: http://host.docker.internal:9000
 
-      MINIO_PUBLIC_AUDIO_ENDPOINT: http://media.localhost/audio
-      MINIO_PUBLIC_IMAGE_ENDPOINT: http://media.localhost/image
-      MINIO_PUBLIC_SEGMENT_ENDPOINT: http://media.localhost/segment
+      MINIO_PUBLIC_AUDIO_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_IMAGE_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_SEGMENT_ENDPOINT: http://media.localhost
 
       KAFKA_BROKERS: broker:29092
     command:
@@ -68,32 +68,16 @@ services:
       MINIO_USER: "minioadmin"
       MINIO_HOST: minio:9000
     deploy:
-      replicas: 2
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 512M
+      replicas: 1
+      # resources:
+      #   limits:
+      #     cpus: "0.50"
+      #     memory: 512M
     depends_on:
       broker:
         condition: service_healthy
     links:
       - broker
-    networks:
-      - my-bridge
-
-  client:
-    build:
-      dockerfile: ./Dockerfile
-      context: ./client
-    environment:
-      NEXT_PUBLIC_API: http://localhost/api
-      NEXT_PUBLIC_INTERNAL_API: http://nginx/api
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    links:
-      - backend
     networks:
       - my-bridge
 
@@ -151,10 +135,10 @@ services:
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     healthcheck:
       test: "exit 0"
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1"
+    #       memory: 512M
     networks:
       - my-bridge

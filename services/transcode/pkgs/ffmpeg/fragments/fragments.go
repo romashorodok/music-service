@@ -1,5 +1,7 @@
 package fragments
 
+import "reflect"
+
 const (
 	INPUT   = "-i"
 	MUXER   = "-f"
@@ -32,4 +34,30 @@ type EchoEffect struct{}
 
 func (*EchoEffect) GetFragment() (string, string) {
 	return "-af", "highpass=f=200, lowpass=f=3000"
+}
+
+type LogLevel struct{}
+
+func (*LogLevel) GetFragment() (string, string) {
+	return "-loglevel", "warning"
+}
+
+type Verbose struct{}
+
+func (*Verbose) GetFragment() (string, string) {
+	return "-v", "verbose"
+}
+
+func ContainFragment(fragments *[]FFMpegFragment, fragment interface{}) bool {
+	implType := reflect.TypeOf(fragment)
+
+	for _, frag := range *fragments {
+		fragType := reflect.TypeOf(frag)
+
+		if fragType == implType {
+			return true
+		}
+	}
+
+	return false
 }
