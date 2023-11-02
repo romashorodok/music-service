@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: php-ini-config
+  namespace: staging
+data:
+  php.ini: |
+    upload_max_filesize = 1G
+    post_max_size = 1G
+    max_execution_time = 1360

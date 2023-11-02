@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
 Route::group([], function () {
     Route::group([], function () {
         Route::post('transcode', [TranscodeControllerAlias::class, 'successfullyProcessed']);

@@ -149,7 +149,7 @@ func (s *TranscoderService) TranscodeAudio(t *TranscodeData) error {
 func (s *TranscoderService) OnSuccessProcessingCallCallback(dataReader *bytes.Reader) error {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", s.TRANSOCDE_CALLBACK, dataReader)
+	req, err := http.NewRequest("POST", s.TRANSCODE_CALLBACK, dataReader)
 
 	if err != nil {
 		log.Println("Unable form request", err)

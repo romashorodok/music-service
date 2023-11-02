@@ -60,17 +60,9 @@ class MinioServiceProvider extends ServiceProvider
         return new Filesystem(
             adapter: new AwsS3V3Adapter($client, $bucket),
 
-            publicUrlGenerator: new class($config['public']) implements PublicUrlGenerator
-            {
-                public function __construct(private readonly string $publicPath)
-                {
-                }
-
-                public function publicUrl(string $path, Config $config): string
-                {
-                    return $this->publicPath . "/" . $path;
-                }
-            }
+            publicUrlGenerator: $config['public']
+                ? new \App\Utils\PublicUrlGenerator($config['public'], $bucket)
+                : null
         );
     }
 

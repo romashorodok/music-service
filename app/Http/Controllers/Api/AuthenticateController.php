@@ -56,6 +56,7 @@ class AuthenticateController extends Controller
 
         /* @var User $user */
         $user = User::query()->create([...$data, 'password' => Hash::make($data['password'])]);
+        $user->createAsStripeCustomer();
 
         return response(['token' => $user->createToken(uniqid())->plainTextToken]);
     }
