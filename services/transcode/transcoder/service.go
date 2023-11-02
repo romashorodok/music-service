@@ -53,8 +53,8 @@ var (
 )
 
 func NewTranscoderService(ctx *context.Context, minioCredentials *storage.MinioCredentials, producer *kafka.Producer) *TranscoderService {
-	minioPool, err := storage.NewMinioPool(4, minioCredentials)
-
+  minioPool, err := storage.NewMinioPool(4, minioCredentials)
+  
 	if err != nil {
 		log.Panic("Cannot init minio pool clients. Error: ", err)
 	}

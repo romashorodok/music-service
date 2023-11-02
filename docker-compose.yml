@@ -15,11 +15,11 @@ services:
       MYSQL_ROOT_PASSWORD: password
     healthcheck:
       test: "exit 0"
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "0.50"
-    #       memory: 1G
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 1G
     ports:
       - "3306:3306"
 
@@ -33,9 +33,9 @@ services:
       MINIO_IMAGE_ENDPOINT: http://host.docker.internal:9000
       MINIO_SEGMENT_ENDPOINT: http://host.docker.internal:9000
 
-      MINIO_PUBLIC_AUDIO_ENDPOINT: http://media.localhost/audio
-      MINIO_PUBLIC_IMAGE_ENDPOINT: http://media.localhost/image
-      MINIO_PUBLIC_SEGMENT_ENDPOINT: http://media.localhost/segment
+      MINIO_PUBLIC_AUDIO_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_IMAGE_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_SEGMENT_ENDPOINT: http://media.localhost
 
       KAFKA_BROKERS: broker:29092
     command:
@@ -68,7 +68,7 @@ services:
       MINIO_USER: "minioadmin"
       MINIO_HOST: minio:9000
     deploy:
-      replicas: 2
+      replicas: 1
       # resources:
       #   limits:
       #     cpus: "0.50"
