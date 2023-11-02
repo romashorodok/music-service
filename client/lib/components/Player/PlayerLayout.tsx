@@ -17,9 +17,8 @@ export default function () {
                 : false
         , [audio]);
 
-
     return visible ? (
-        <div className={`flex flex-col justify-center bg-primary ${styles.area_player}`}>
+        <div className={`flex flex-col justify-center bg-primary shadow-[1px_-5px_20px_black] ${styles.area_player}`}>
             <div className="flex flex-grow flex-row items-center mx-4 space-x-4">
                 <div className="flex-[1] w-full">
                 </div>
