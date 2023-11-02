@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\StorageUploadable;
 use Backpack\CRUD\app\Models\Traits\CrudTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Audio extends Model
 {
     use CrudTrait;
     use HasFactory;
+    use StorageUploadable;
 
     /*
     |--------------------------------------------------------------------------
@@ -25,6 +29,8 @@ class Audio extends Model
     // protected $fillable = [];
     // protected $hidden = [];
     // protected $dates = [];
+
+    private string $disk = 'minio.audio';
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +69,13 @@ class Audio extends Model
     | ACCESSORS
     |--------------------------------------------------------------------------
     */
+    public function originalAudioFile(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => $value == '' ? null : Storage::disk($this->disk)->publicUrl($value),
+            set: fn($value) => $this->upload('original_audio_file', $value)
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
