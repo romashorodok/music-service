@@ -1,41 +1,144 @@
 version: "3.8"
 
-services:
-    mysqldb:
-        image: mysql:8.0.33
-        environment:
-            MYSQL_USER: user
-            MYSQL_PASSWORD: password
-            MYSQL_DATABASE: db
-            MYSQL_ROOT_PASSWORD: password
-        ports:
-            - "3306:3306"
-    minio:
-        image: minio/minio:RELEASE.2023-04-07T05-28-58Z
-        ports:
-            - "9000:9000"
-            - "9001:9001"
-        command: server --console-address ":9001" /data
-    broker:
-      image: confluentinc/cp-kafka:7.4.0
-      ports:
-        - "9092:9092"
-        - "9101:9101"
-      environment:
-        KAFKA_NODE_ID: 1
-        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-        KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
-        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-        KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-        KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-        KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-        KAFKA_JMX_PORT: 9101
-        KAFKA_JMX_HOSTNAME: localhost
-        KAFKA_PROCESS_ROLES: 'broker,controller'
-        KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
-        KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
-        KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
-        KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
-        KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-        CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+networks:
+  my-bridge:
+    driver: bridge
 
+services:
+
+  mysqldb:
+    image: mysql:8.0.33
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: password
+    healthcheck:
+      test: "exit 0"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 1G
+    ports:
+      - "3306:3306"
+
+  backend:
+    build:
+      dockerfile: ./Dockerfile
+    environment:
+      DB_HOST: host.docker.internal
+
+      MINIO_AUDIO_ENDPOINT: http://host.docker.internal:9000
+      MINIO_IMAGE_ENDPOINT: http://host.docker.internal:9000
+      MINIO_SEGMENT_ENDPOINT: http://host.docker.internal:9000
+
+      MINIO_PUBLIC_AUDIO_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_IMAGE_ENDPOINT: http://media.localhost
+      MINIO_PUBLIC_SEGMENT_ENDPOINT: http://media.localhost
+
+      KAFKA_BROKERS: broker:29092
+    command:
+      - /bin/bash
+      - -c
+      - |
+          php artisan migrate
+          php-fpm
+    networks:
+      - my-bridge
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    links:
+      - mysqldb
+    env_file:
+      - .env
+    volumes:
+      - ./infra/php.ini:/usr/local/etc/php/php.ini
+
+  transcoder:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./services/transcode
+    environment:
+      KAFKA_BROKERS: broker:29092
+      TRANSCODE_CALLBACK: http://nginx/api/transcode
+
+      MINIO_PASSWORD: "minioadmin"
+      MINIO_USER: "minioadmin"
+      MINIO_HOST: minio:9000
+    deploy:
+      replicas: 1
+      # resources:
+      #   limits:
+      #     cpus: "0.50"
+      #     memory: 512M
+    depends_on:
+      broker:
+        condition: service_healthy
+    links:
+      - broker
+    networks:
+      - my-bridge
+
+  nginx:
+    image: nginx:alpine3.17
+    ports:
+      - 80:80
+    volumes:
+      - ./public/packages:/var/www/public/packages:cached
+      - ./infra/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - transcoder
+    networks:
+      - my-bridge
+
+  minio:
+    image: minio/minio:RELEASE.2023-04-07T05-28-58Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+    command: server --console-address ":9001" /data
+    networks:
+      - my-bridge
+
+  broker:
+    image: confluentinc/cp-kafka:7.4.0
+    ports:
+      - "9092:9092"
+      - "9101:9101"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@broker:29093"
+      KAFKA_LISTENERS: "PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=WARN"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    healthcheck:
+      test: "exit 0"
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1"
+    #       memory: 512M
+    networks:
+      - my-bridge

@@ -7,7 +7,9 @@ use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
+use League\Flysystem\UrlGeneration\PublicUrlGenerator;
 
 class MinioServiceProvider extends ServiceProvider
 {
@@ -55,7 +57,21 @@ class MinioServiceProvider extends ServiceProvider
             ]);
         }
 
-        return new Filesystem(new AwsS3V3Adapter($client, $bucket));
+        return new Filesystem(
+            adapter: new AwsS3V3Adapter($client, $bucket),
+
+            publicUrlGenerator: new class($config['public']) implements PublicUrlGenerator
+            {
+                public function __construct(private readonly string $publicPath)
+                {
+                }
+
+                public function publicUrl(string $path, Config $config): string
+                {
+                    return $this->publicPath . "/" . $path;
+                }
+            }
+        );
     }
 
     /**
