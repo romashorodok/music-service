@@ -2,11 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "@radix-ui/colors/lime.css";
+
 :root {
   --font: sans-serif;
   --dark-background: #181818;
 
   --dark-primary: #232323;
+  --dark-secondary: #1c1c1c;
 
   --player-grid-height: 80px;
   --header-grid-height: 60px;
@@ -40,6 +43,10 @@ a {
      background-color: var(--dark-primary)
  }
 
+ .bg-secondary {
+     background-color: var(--dark-secondary);
+ }
+
   html {
     color-scheme: dark;
   }
@@ -47,4 +54,8 @@ a {
   body {
       background-color: var(--dark-background);
   }
+}
+
+.StripeElement iframe:focus-visible {
+    outline: none
 }

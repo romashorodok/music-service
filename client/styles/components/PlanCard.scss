@@ -1,0 +1,9 @@
+@use '../../app/responsive' as responsive;
+
+.plan_card_wrapper {
+
+    @include responsive.mobile {
+        height: 250px;
+    }
+}
+

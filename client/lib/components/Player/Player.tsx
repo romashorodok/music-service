@@ -1,10 +1,12 @@
 'use client'
 
-import React, {useState} from "react"
+import React, { useState } from "react"
 import * as Slider from '@radix-ui/react-slider';
 import usePlayer from "~/lib/hooks/usePlayer";
-import {PlayButton} from "~/lib/components/audio-card";
-import {BITRATES, DEFAULT_VOLUME} from "~/lib/contexts/player-context";
+import { PlayButton } from "~/lib/components/audio-card";
+import { BITRATES, DEFAULT_VOLUME } from "~/lib/contexts/player-context";
+import { useSubscription } from "~/lib/hooks/useSubscription";
+import useAuth from "~/lib/hooks/useAuth";
 
 if (typeof window !== 'undefined') {
     // @ts-ignore
@@ -43,17 +45,28 @@ type Props = {
     sliderClassName?: string;
 };
 
+/* eslint-disable */
 export default React.forwardRef<
     HTMLDivElement,
     React.PropsWithChildren<Props>
->(({children, className, sliderClassName, ...props}, forwardedRef) => {
+>(({ children, className, sliderClassName, ...props }, forwardedRef) => {
     const playerRef = React.useRef<HTMLAudioElement>();
 
     const [player] = useState<shaka.Player>(new shaka.Player());
     const [time, setTime] = React.useState<number>();
     const [duration, setDuration] = React.useState<number>();
 
-    const {setPlayer, audio, setPlaying, playing, bitrate} = usePlayer();
+    const { ALLOW_HIGH_BITRATE, setPlayer, audio, setPlaying, playing, bitrate, setBitrate } = usePlayer();
+
+    const { subscriberAction } = useSubscription();
+
+    const ALLOW_DURATION_CHANGE = React.useMemo<boolean>(() => subscriberAction({
+        grants: ['UNLIMITED', 'EXTENDED']
+    }), [subscriberAction]);
+
+    React.useEffect(() => {
+        setBitrate(ALLOW_HIGH_BITRATE ? "HIGH" : "NORMAL")
+    }, [ALLOW_HIGH_BITRATE]);
 
     React.useEffect(() => {
         if (audio?.manifest) {
@@ -120,9 +133,15 @@ export default React.forwardRef<
         setPlaying(false);
     }
 
+    function onUserChangeDuration(time: number) {
+        if (ALLOW_DURATION_CHANGE) {
+            playerRef.current.currentTime = time;
+        }
+    }
+
     return (
         <div className={`${className}`} {...props} ref={forwardedRef}>
-            <audio ref={playerRef}/>
+            <audio ref={playerRef} />
 
             <div>
                 <div className="flex justify-center">
@@ -141,15 +160,15 @@ export default React.forwardRef<
                         className={`relative flex items-center select-none touch-none w-[200px] h-5`}
                         value={[time]}
                         max={duration}
-                        onValueChange={([time]) => playerRef.current.currentTime = time}
+                        onValueChange={([time]) => onUserChangeDuration(time)}
                         defaultValue={[0]}
                         step={1}
                         aria-label="Volume">
-                        <Slider.Track className="bg-blackA10 relative grow rounded-full h-[3px]">
-                            <Slider.Range className="absolute bg-white rounded-full h-full"/>
+                        <Slider.Track className={`relative grow rounded-full h-[3px] ${ALLOW_DURATION_CHANGE ? 'bg-blackA10' : 'bg-white'}`}>
+                            <Slider.Range className={`absolute bg-white rounded-full h-full`} />
                         </Slider.Track>
                         <Slider.Thumb
-                            className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA7 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA8"/>
+                            className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA7 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA8" />
                     </Slider.Root>
                     <p>{formatAudioDuration(duration)}</p>
                 </div>

@@ -1,3 +1,5 @@
+.DS_Store
+seed
 /.phpunit.cache
 /node_modules
 /public/build
